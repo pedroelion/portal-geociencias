@@ -16,16 +16,22 @@
         <!-- Top Navbar -->
         <header class="portal-header">
             <div class="brand">
-                <div class="brand-logo">🌐</div>
-                <div>
+                <div class="brand-logo" aria-hidden="true">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path>
+                        <path d="M2 12h20"></path>
+                    </svg>
+                </div>
+                <div class="brand-info">
                     <h1>Portal Integrado de Geociências & Mineração</h1>
-                    <p class="brand-sub">Ambiente Corporativo Unificado • Padrão Arquitetural MVC • 100% Python Puro (Standard Library)</p>
+                    <p class="brand-sub">Ambiente Corporativo Unificado • Padrão Arquitetural MVC • 100% Python Puro</p>
                 </div>
             </div>
             <div class="header-tags">
                 <span class="tag-tech"><span class="pulse-dot"></span> Servidor HTTP Nativo Dual-Stack</span>
                 <span class="tag-tech tag-noframework">Sem Frameworks (Zero Flask/Django)</span>
-                <span class="tag-tech tag-free">Cloud Ready (Deploy Gratuito)</span>
+                <span class="tag-tech tag-free">Cloud Ready (Deploy Ativo)</span>
             </div>
         </header>
 
@@ -36,11 +42,15 @@
             <section class="banner-welcome">
                 <div class="banner-content">
                     <h2>Hub de Soluções Espaciais e Geológicas</h2>
-                    <p>Acesse de forma centralizada os dois sistemas de geociências desenvolvidos em conformidade com as diretrizes da ANM e técnicas avançadas de sensoriamento remoto, ou execute cada subsistema de forma independente.</p>
+                    <p>Acesse de forma centralizada os dois sistemas de geociências desenvolvidos em conformidade com as diretrizes da ANM e técnicas avançadas de sensoriamento remoto com persistência PostGIS e SQLite.</p>
                 </div>
                 <div class="banner-status-pill">
                     <div class="status-indicator">
-                        <span class="status-icon">⚡</span>
+                        <div class="status-icon" aria-hidden="true">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
+                            </svg>
+                        </div>
                         <div>
                             <span class="status-title">Status dos Módulos</span>
                             <span class="status-desc" id="status-portal-txt">Sincronizando telemetria...</span>
@@ -79,7 +89,13 @@
                 <!-- Card 1: Títulos Minerários -->
                 <div class="system-card card-titulos">
                     <div class="card-header">
-                        <div class="system-icon">⛏️</div>
+                        <div class="system-icon" aria-hidden="true">
+                            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                                <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                                <polyline points="2 17 12 22 22 17"></polyline>
+                                <polyline points="2 12 12 17 22 12"></polyline>
+                            </svg>
+                        </div>
                         <div class="system-title-wrap">
                             <span class="system-category">Tema 1 • Regulação e Espacial</span>
                             <h3>Gestão de Títulos Minerários</h3>
@@ -101,7 +117,10 @@
                     <div class="card-actions">
                         <a href="/titulos" class="btn btn-primary">
                             <span>Abrir Sistema de Títulos</span>
-                            <span class="arrow">→</span>
+                            <svg class="btn-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                                <polyline points="12 5 19 12 12 19"></polyline>
+                            </svg>
                         </a>
                         <div class="sub-links">
                             <a href="/api/titulos/painel" target="_blank" class="link-sub">API Painel</a>
@@ -114,7 +133,12 @@
                 <!-- Card 2: Extração de Lineamentos -->
                 <div class="system-card card-lineamentos">
                     <div class="card-header">
-                        <div class="system-icon">🛰️</div>
+                        <div class="system-icon icon-purple" aria-hidden="true">
+                            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <path d="m16.24 7.76-2.12 6.36-6.36 2.12 2.12-6.36z"></path>
+                            </svg>
+                        </div>
                         <div class="system-title-wrap">
                             <span class="system-category">Projeto 4 • Sensoriamento Remoto</span>
                             <h3>Extração de Lineamentos Estruturais</h3>
@@ -134,9 +158,12 @@
                     </div>
 
                     <div class="card-actions">
-                        <a href="/lineamentos" class="btn btn-emerald">
+                        <a href="/lineamentos" class="btn btn-violet">
                             <span>Abrir Sistema de Lineamentos</span>
-                            <span class="arrow">→</span>
+                            <svg class="btn-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                                <polyline points="12 5 19 12 12 19"></polyline>
+                            </svg>
                         </a>
                         <div class="sub-links">
                             <a href="/api/lineamentos/analises" target="_blank" class="link-sub">API Análises</a>
@@ -146,85 +173,6 @@
                     </div>
                 </div>
 
-            </section>
-
-            <!-- Guide & Independent Execution Section -->
-            <section class="guide-section">
-                <div class="guide-header">
-                    <h3>💻 Guia de Execução: Isolada ou Unificada</h3>
-                    <p>Ambos os sistemas foram construídos para operar de maneira 100% modular, sem dependência mútua obrigatória.</p>
-                </div>
-
-                <div class="code-blocks-grid">
-                    <!-- Execução Unificada -->
-                    <div class="code-card">
-                        <div class="code-header">
-                            <span class="code-dot red"></span>
-                            <span class="code-dot yellow"></span>
-                            <span class="code-dot green"></span>
-                            <span class="code-title">1. Executar os Dois Sistemas Juntos (Portal Unificado)</span>
-                        </div>
-                        <pre class="code-box"><code># A partir da pasta portal_geociencias:
-cd "D:\Pedro\Desktop\portal_geociencias"
-python portal_app.py
-
-# Acesso Unificado no Navegador:
-# Hub:         http://localhost:8000/
-# Títulos:     http://localhost:8000/titulos
-# Lineamentos: http://localhost:8000/lineamentos</code></pre>
-                    </div>
-
-                    <!-- Execução Isolada Títulos -->
-                    <div class="code-card">
-                        <div class="code-header">
-                            <span class="code-dot red"></span>
-                            <span class="code-dot yellow"></span>
-                            <span class="code-dot green"></span>
-                            <span class="code-title">2. Executar Apenas Títulos Minerários</span>
-                        </div>
-                        <pre class="code-box"><code># A partir da pasta do Tema 1:
-cd "D:\Pedro\Desktop\Sistema corporativo de gestão de títulos minerários\gestao_titulos_anm"
-python app.py
-
-# Ou dentro do portal:
-# cd "D:\Pedro\Desktop\portal_geociencias	itulos" && python app.py
-# Acesso: http://localhost:8080/</code></pre>
-                    </div>
-
-                    <!-- Execução Isolada Lineamentos -->
-                    <div class="code-card">
-                        <div class="code-header">
-                            <span class="code-dot red"></span>
-                            <span class="code-dot yellow"></span>
-                            <span class="code-dot green"></span>
-                            <span class="code-title">3. Executar Apenas Lineamentos Estruturais</span>
-                        </div>
-                        <pre class="code-box"><code># A partir da pasta do Projeto 4:
-cd "D:\Pedro\Desktop\Extração de lineamentos estruturais\extracao_lineamentos"
-python app.py
-
-# Ou dentro do portal:
-# cd "D:\Pedro\Desktop\portal_geociencias\lineamentos" && python app.py
-# Acesso: http://localhost:8081/</code></pre>
-                    </div>
-
-                    <!-- Deploy Gratuito -->
-                    <div class="code-card">
-                        <div class="code-header">
-                            <span class="code-dot red"></span>
-                            <span class="code-dot yellow"></span>
-                            <span class="code-dot green"></span>
-                            <span class="code-title">4. Publicação Gratuita na Nuvem (Render / Railway / Fly.io)</span>
-                        </div>
-                        <pre class="code-box"><code># Nenhuma dependência pesada! Comando de Start:
-python portal_app.py
-
-# Variáveis de Ambiente Suportadas:
-PORT=8000
-DATABASE_URL=postgresql://usuario:senha@host:5432/banco
-# Zero senhas fixas no código!</code></pre>
-                    </div>
-                </div>
             </section>
 
         </main>

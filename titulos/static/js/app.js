@@ -149,15 +149,15 @@ function inicializarMapa() {
 
     // 3. Controle de Camadas
     const baseMaps = {
-        "🗺️ Esri Dark Gray (Elegante)": esriDark,
-        "🌍 OpenStreetMap (Padrão)": osm,
-        "🛰️ Satélite Esri (Alta Resolução)": esriSat,
-        "🏔️ Esri Topográfico": esriTopo,
-        "📐 Grade Cartográfica (Modo Offline)": gradeOffline
+        "Esri Dark Gray (Elegante)": esriDark,
+        "OpenStreetMap (Padrão)": osm,
+        "Satélite Esri (Alta Resolução)": esriSat,
+        "Esri Topográfico": esriTopo,
+        "Grade Cartográfica (Modo Offline)": gradeOffline
     };
 
     const overlayMaps = {
-        "🌐 Grade de Coordenadas (SIRGAS 2000)": camadaGrade
+        "Grade de Coordenadas (SIRGAS 2000)": camadaGrade
     };
 
     L.control.layers(baseMaps, overlayMaps, {
@@ -364,7 +364,7 @@ async function carregarAlertasUrgentes() {
                 <div class="alert-tipo">${a.tipo_obrigacao}</div>
                 <div class="alert-desc">${a.descricao || a.observacoes || 'Sem observações adicionais.'}</div>
                 <div style="margin-top: 8px; display: flex; justify-content: flex-end;">
-                    <button class="btn btn-secondary btn-sm" onclick="cumprirObrigacao(${a.obrigacao_id})">✓ Dar Baixa</button>
+                    <button class="btn btn-secondary btn-sm" onclick="cumprirObrigacao(${a.obrigacao_id})">Dar Baixa</button>
                 </div>
             `;
             container.appendChild(div);
@@ -425,7 +425,7 @@ function renderizarTabelaProcessos(processos) {
                 ` : '<span style="color: #64748b;">-</span>'}
             </td>
             <td>
-                <button class="btn btn-secondary btn-sm" onclick="centralizarMapa(${p.processo_id})">📍 Mapa</button>
+                <button class="btn btn-secondary btn-sm" onclick="centralizarMapa(${p.processo_id})">Ver no Mapa</button>
             </td>
         `;
         tbody.appendChild(tr);
@@ -497,7 +497,7 @@ async function carregarObrigacoes() {
                 <td><span class="badge-status neutral">${o.status}</span></td>
                 <td>
                     ${o.status === 'Pendente' ? `
-                        <button class="btn btn-secondary btn-sm" onclick="cumprirObrigacao(${o.id})">✓ Baixa</button>
+                        <button class="btn btn-secondary btn-sm" onclick="cumprirObrigacao(${o.id})">Baixa</button>
                     ` : '<span style="color: #06d6a0;">Concluído</span>'}
                 </td>
             `;
@@ -561,7 +561,7 @@ async function enviarNovoEvento(event) {
         const res = await resp.json();
 
         if (res.sucesso) {
-            alert("✓ " + res.mensagem);
+            alert(res.mensagem);
             fecharModalEvento();
             // Atualiza todos os dados
             carregarPainel();
@@ -592,7 +592,7 @@ async function cumprirObrigacao(obrigacaoId) {
         });
         const res = await resp.json();
         if (res.sucesso) {
-            alert("✓ Obrigação baixada com sucesso!");
+            alert("Obrigação baixada com sucesso!");
             carregarPainel();
             carregarAlertasUrgentes();
             carregarProcessos();

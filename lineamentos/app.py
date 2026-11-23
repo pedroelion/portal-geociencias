@@ -57,7 +57,7 @@ def main():
     except KeyboardInterrupt:
         print("\n[!] Sinal de interrupção recebido. Encerrando servidor HTTP...")
         servidor.server_close()
-        print("[✓] Servidor finalizado com sucesso.")
+        print("[+] Servidor finalizado com sucesso.")
 
 if __name__ == "__main__":
     main()
