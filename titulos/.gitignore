@@ -1,0 +1,27 @@
+# Python Bytecode e Cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+
+# Ambientes Virtuais
+venv/
+.venv/
+env/
+ENV/
+
+# Variáveis de Ambiente e Segredos
+.env
+.env.*
+!.env.example
+
+# Bancos de dados locais / temporários
+*.sqlite3
+*.db-journal
+
+# IDE e Sistema Operacional
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.log

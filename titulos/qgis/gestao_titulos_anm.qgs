@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="utf-8"?>
+<qgis projectname="Sistema Corporativo de Gestão de Títulos Minerários - ANM" version="3.40.15">
+  <title>Sistema Corporativo de Gestão de Títulos Minerários - ANM</title>
+  <homePath path=""/>
+  <autotransaction active="0"/>
+  <evaluateDefaultValues active="0"/>
+  <trust active="0"/>
+  <projectCrs>
+    <spatialrefsys>
+      <wkt>GEOGCRS["SIRGAS 2000",DATUM["Sistema de Referencia Geocentrico para las Americas 2000",ELLIPSOID["GRS 1980",6378137,298.257222101]],PRIMEM["Greenwich",0],CS[ellipsoidal,2],AXIS["geodetic latitude (Lat)",north],AXIS["geodetic longitude (Lon)",east],ID["EPSG",4674]]</wkt>
+      <proj4>+proj=longlat +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +no_defs</proj4>
+      <srsid>3224</srsid>
+      <srid>4674</srid>
+      <authid>EPSG:4674</authid>
+      <description>SIRGAS 2000</description>
+      <projectionacronym>longlat</projectionacronym>
+      <ellipsoidacronym>GRS80</ellipsoidacronym>
+      <geographicflag>true</geographicflag>
+    </spatialrefsys>
+  </projectCrs>
+  <layer-tree-group>
+    <customproperties/>
+    <layer-tree-group name="Painel de Situação Espacial" expanded="1" checked="Qt::Checked">
+      <layer-tree-layer id="lyr_situacao_espacial" name="Situação Espacial e Pior Alerta (Geral)" source="dbname='gestao_titulos_minerarios' host='localhost' port='5432' user='pedro' password='123' sslmode=prefer key='processo_id' srid=4674 type=MultiPolygon table=&quot;public&quot;.&quot;vw_processos_situacao_espacial&quot; (geom)" providerKey="postgres" checked="Qt::Checked"/>
+      <layer-tree-layer id="lyr_relatorio_pesquisa" name="Painel RFP - Relatório de Pesquisa" source="dbname='gestao_titulos_minerarios' host='localhost' port='5432' user='pedro' password='123' sslmode=prefer key='obrigacao_id' srid=4674 type=MultiPolygon table=&quot;public&quot;.&quot;vw_processos_relatorio_pesquisa&quot; (geom)" providerKey="postgres" checked="Qt::Unchecked"/>
+      <layer-tree-layer id="lyr_tah" name="Painel TAH - Taxa Anual por Hectare" source="dbname='gestao_titulos_minerarios' host='localhost' port='5432' user='pedro' password='123' sslmode=prefer key='obrigacao_id' srid=4674 type=MultiPolygon table=&quot;public&quot;.&quot;vw_processos_taxa_anual_hectare&quot; (geom)" providerKey="postgres" checked="Qt::Unchecked"/>
+      <layer-tree-layer id="lyr_guia_utilizacao" name="Painel GU - Guia de Utilização" source="dbname='gestao_titulos_minerarios' host='localhost' port='5432' user='pedro' password='123' sslmode=prefer key='obrigacao_id' srid=4674 type=MultiPolygon table=&quot;public&quot;.&quot;vw_processos_guia_utilizacao&quot; (geom)" providerKey="postgres" checked="Qt::Unchecked"/>
+    </layer-tree-group>
+    <layer-tree-group name="Cadastro Base ANM" expanded="1" checked="Qt::Checked">
+      <layer-tree-layer id="lyr_processo" name="Poligonais de Processos (Cadastro Base)" source="dbname='gestao_titulos_minerarios' host='localhost' port='5432' user='pedro' password='123' sslmode=prefer key='id' srid=4674 type=MultiPolygon table=&quot;public&quot;.&quot;processo&quot; (geom)" providerKey="postgres" checked="Qt::Checked"/>
+    </layer-tree-group>
+    <layer-tree-group name="Tabelas Corporativas 1:N" expanded="1" checked="Qt::Checked">
+      <layer-tree-layer id="lyr_titular" name="Titulares Minerários (SIGMINE)" source="dbname='gestao_titulos_minerarios' host='localhost' port='5432' user='pedro' password='123' sslmode=prefer key='id' table=&quot;public&quot;.&quot;titular&quot;" providerKey="postgres" checked="Qt::Unchecked"/>
+      <layer-tree-layer id="lyr_evento" name="Histórico de Eventos Regulatórios" source="dbname='gestao_titulos_minerarios' host='localhost' port='5432' user='pedro' password='123' sslmode=prefer key='id' table=&quot;public&quot;.&quot;evento&quot;" providerKey="postgres" checked="Qt::Unchecked"/>
+      <layer-tree-layer id="lyr_obrigacao" name="Prazos e Obrigações Legais" source="dbname='gestao_titulos_minerarios' host='localhost' port='5432' user='pedro' password='123' sslmode=prefer key='id' table=&quot;public&quot;.&quot;obrigacao&quot;" providerKey="postgres" checked="Qt::Unchecked"/>
+    </layer-tree-group>
+    <layer-tree-group name="Dashboards e Relatórios" expanded="1" checked="Qt::Checked">
+      <layer-tree-layer id="lyr_painel_consolidado" name="Painel Consolidado de Conformidade" source="dbname='gestao_titulos_minerarios' host='localhost' port='5432' user='pedro' password='123' sslmode=prefer key='tipo_obrigacao' table=&quot;public&quot;.&quot;vw_painel_prazos_consolidado&quot;" providerKey="postgres" checked="Qt::Unchecked"/>
+      <layer-tree-layer id="lyr_alertas_urgentes" name="Alertas Urgentes (Ação Imediata)" source="dbname='gestao_titulos_minerarios' host='localhost' port='5432' user='pedro' password='123' sslmode=prefer key='obrigacao_id' table=&quot;public&quot;.&quot;vw_painel_alertas_urgentes&quot;" providerKey="postgres" checked="Qt::Unchecked"/>
+    </layer-tree-group>
+  </layer-tree-group>
+  <projectlayers>
+    <maplayer type="vector" geometry="Polygon" hasScaleBasedVisibilityFlag="0" autoRefreshEnabled="0" readOnly="0">
+      <id>lyr_situacao_espacial</id>
+      <datasource>dbname='gestao_titulos_minerarios' host='localhost' port='5432' user='pedro' password='123' sslmode=prefer key='processo_id' srid=4674 type=MultiPolygon table="public"."vw_processos_situacao_espacial" (geom)</datasource>
+      <keywordList/>
+      <layername>Situação Espacial e Pior Alerta (Geral)</layername>
+      <srs/>
+      <spatialrefsys>
+        <authid>EPSG:4674</authid>
+        <srid>4674</srid>
+        <description>SIRGAS 2000</description>
+      </spatialrefsys>
+      <provider encoding="UTF-8">postgres</provider>
+      <renderer-v2 type="RuleRenderer" symbollevels="0">
+        <rules key="root">
+          <rule key="rule_venc" label="Obrigação Vencida (Crítico)" filter="&quot;pior_nivel_alerta&quot; = 'Vencido'" symbol="sym_venc"/>
+          <rule key="rule_crit" label="Próximo ao Vencimento (≤ 30 dias)" filter="&quot;pior_nivel_alerta&quot; = 'Alerta Crítico / Próximo ao Vencimento'" symbol="sym_crit"/>
+          <rule key="rule_ok" label="No Prazo (&gt; 30 dias)" filter="&quot;pior_nivel_alerta&quot; = 'No Prazo'" symbol="sym_ok"/>
+          <rule key="rule_cump" label="Regular / Cumprido" filter="&quot;pior_nivel_alerta&quot; = 'Cumprido / Regular'" symbol="sym_cump"/>
+        </rules>
+        <symbols>
+          <symbol name="sym_venc" type="fill" alpha="0.7">
+            <layer class="SimpleFill" locked="0" pass="0">
+              <prop k="color" v="217,4,41,180"/>
+              <prop k="outline_color" v="114,0,38,255"/>
+              <prop k="outline_width" v="0.6"/>
+            </layer>
+          </symbol>
+          <symbol name="sym_crit" type="fill" alpha="0.7">
+            <layer class="SimpleFill" locked="0" pass="0">
+              <prop k="color" v="247,127,0,180"/>
+              <prop k="outline_color" v="167,75,0,255"/>
+              <prop k="outline_width" v="0.6"/>
+            </layer>
+          </symbol>
+          <symbol name="sym_ok" type="fill" alpha="0.6">
+            <layer class="SimpleFill" locked="0" pass="0">
+              <prop k="color" v="6,214,160,150"/>
+              <prop k="outline_color" v="2,107,80,255"/>
+              <prop k="outline_width" v="0.4"/>
+            </layer>
+          </symbol>
+          <symbol name="sym_cump" type="fill" alpha="0.5">
+            <layer class="SimpleFill" locked="0" pass="0">
+              <prop k="color" v="17,138,178,130"/>
+              <prop k="outline_color" v="7,59,76,255"/>
+              <prop k="outline_width" v="0.4"/>
+            </layer>
+          </symbol>
+        </symbols>
+      </renderer-v2>
+      <labeling type="simple">
+        <settings calloutType="simple">
+          <text-style fontFamily="Segoe UI" fontSize="9" fontWeight="bold" textColor="0,0,0,255" fieldName="&quot;numero_processo&quot; || '&#10;' || &quot;substancia_mineral&quot;"/>
+          <text-buffer bufferDraw="1" bufferSize="1.0" bufferColor="255,255,255,230"/>
+        </settings>
+      </labeling>
+    </maplayer>
+    <maplayer type="vector" geometry="Polygon" hasScaleBasedVisibilityFlag="0" autoRefreshEnabled="0" readOnly="0">
+      <id>lyr_relatorio_pesquisa</id>
+      <datasource>dbname='gestao_titulos_minerarios' host='localhost' port='5432' user='pedro' password='123' sslmode=prefer key='obrigacao_id' srid=4674 type=MultiPolygon table="public"."vw_processos_relatorio_pesquisa" (geom)</datasource>
+      <keywordList/>
+      <layername>Painel RFP - Relatório de Pesquisa</layername>
+      <srs/>
+      <spatialrefsys>
+        <authid>EPSG:4674</authid>
+        <srid>4674</srid>
+        <description>SIRGAS 2000</description>
+      </spatialrefsys>
+      <provider encoding="UTF-8">postgres</provider>
+    </maplayer>
+    <maplayer type="vector" geometry="Polygon" hasScaleBasedVisibilityFlag="0" autoRefreshEnabled="0" readOnly="0">
+      <id>lyr_tah</id>
+      <datasource>dbname='gestao_titulos_minerarios' host='localhost' port='5432' user='pedro' password='123' sslmode=prefer key='obrigacao_id' srid=4674 type=MultiPolygon table="public"."vw_processos_taxa_anual_hectare" (geom)</datasource>
+      <keywordList/>
+      <layername>Painel TAH - Taxa Anual por Hectare</layername>
+      <srs/>
+      <spatialrefsys>
+        <authid>EPSG:4674</authid>
+        <srid>4674</srid>
+        <description>SIRGAS 2000</description>
+      </spatialrefsys>
+      <provider encoding="UTF-8">postgres</provider>
+    </maplayer>
+    <maplayer type="vector" geometry="Polygon" hasScaleBasedVisibilityFlag="0" autoRefreshEnabled="0" readOnly="0">
+      <id>lyr_guia_utilizacao</id>
+      <datasource>dbname='gestao_titulos_minerarios' host='localhost' port='5432' user='pedro' password='123' sslmode=prefer key='obrigacao_id' srid=4674 type=MultiPolygon table="public"."vw_processos_guia_utilizacao" (geom)</datasource>
+      <keywordList/>
+      <layername>Painel GU - Guia de Utilização</layername>
+      <srs/>
+      <spatialrefsys>
+        <authid>EPSG:4674</authid>
+        <srid>4674</srid>
+        <description>SIRGAS 2000</description>
+      </spatialrefsys>
+      <provider encoding="UTF-8">postgres</provider>
+    </maplayer>
+    <maplayer type="vector" geometry="Polygon" hasScaleBasedVisibilityFlag="0" autoRefreshEnabled="0" readOnly="0">
+      <id>lyr_processo</id>
+      <datasource>dbname='gestao_titulos_minerarios' host='localhost' port='5432' user='pedro' password='123' sslmode=prefer key='id' srid=4674 type=MultiPolygon table="public"."processo" (geom)</datasource>
+      <keywordList/>
+      <layername>Poligonais de Processos (Cadastro Base)</layername>
+      <srs/>
+      <spatialrefsys>
+        <authid>EPSG:4674</authid>
+        <srid>4674</srid>
+        <description>SIRGAS 2000</description>
+      </spatialrefsys>
+      <provider encoding="UTF-8">postgres</provider>
+      <editorlayout>tablayout</editorlayout>
+      <attributeEditorForm>
+        <attributeEditorContainer name="1. Dados Cadastrais ANM" columnCount="2" groupBox="0" visibilityExpression="">
+          <attributeEditorField name="numero_processo" index="0"/>
+          <attributeEditorField name="ano_processo" index="0"/>
+          <attributeEditorField name="titular_id" index="0"/>
+          <attributeEditorField name="fase" index="0"/>
+          <attributeEditorField name="substancia_mineral" index="0"/>
+          <attributeEditorField name="uso_substancia" index="0"/>
+          <attributeEditorField name="area_ha" index="0"/>
+          <attributeEditorField name="municipio" index="0"/>
+          <attributeEditorField name="uf" index="0"/>
+        </attributeEditorContainer>
+        <attributeEditorContainer name="2. Marcos Regulatórios" columnCount="2" groupBox="0" visibilityExpression="">
+          <attributeEditorField name="data_requerimento" index="0"/>
+          <attributeEditorField name="data_publicacao_alvara" index="0"/>
+          <attributeEditorField name="prazo_alvara_anos" index="0"/>
+          <attributeEditorField name="data_vencimento_alvara" index="0"/>
+          <attributeEditorField name="data_portaria_lavra" index="0"/>
+          <attributeEditorField name="status_processo" index="0"/>
+        </attributeEditorContainer>
+        <attributeEditorContainer name="3. Histórico de Eventos" columnCount="1" groupBox="0" visibilityExpression="">
+          <attributeEditorRelation name="rel_processo_evento" relation="rel_processo_evento" showLabel="1"/>
+        </attributeEditorContainer>
+        <attributeEditorContainer name="4. Prazos e Obrigações Legais" columnCount="1" groupBox="0" visibilityExpression="">
+          <attributeEditorRelation name="rel_processo_obrigacao" relation="rel_processo_obrigacao" showLabel="1"/>
+        </attributeEditorContainer>
+      </attributeEditorForm>
+      <constraints>
+        <constraint field="numero_processo" constraints="3" exp="regexp_match(&quot;numero_processo&quot;, '^\\d{3,6}\\.\\d{3}/\\d{4}$')" desc="Formato de processo ANM inválido! Utilize o padrão: 800.123/2021"/>
+        <constraint field="area_ha" constraints="3" exp="&quot;area_ha&quot; &gt; 0" desc="A área do processo deve ser superior a zero hectares!"/>
+        <constraint field="ano_processo" constraints="3" exp="&quot;ano_processo&quot; &gt;= 1934 AND &quot;ano_processo&quot; &lt;= 2100" desc="Ano de processo inválido."/>
+      </constraints>
+    </maplayer>
+    <maplayer type="vector" geometry="NoGeometry" hasScaleBasedVisibilityFlag="0" autoRefreshEnabled="0" readOnly="0">
+      <id>lyr_titular</id>
+      <datasource>dbname='gestao_titulos_minerarios' host='localhost' port='5432' user='pedro' password='123' sslmode=prefer key='id' table="public"."titular"</datasource>
+      <keywordList/>
+      <layername>Titulares Minerários (SIGMINE)</layername>
+      <srs/>
+      <spatialrefsys>
+        <authid>EPSG:4674</authid>
+        <srid>4674</srid>
+        <description>SIRGAS 2000</description>
+      </spatialrefsys>
+      <provider encoding="UTF-8">postgres</provider>
+    </maplayer>
+    <maplayer type="vector" geometry="NoGeometry" hasScaleBasedVisibilityFlag="0" autoRefreshEnabled="0" readOnly="0">
+      <id>lyr_evento</id>
+      <datasource>dbname='gestao_titulos_minerarios' host='localhost' port='5432' user='pedro' password='123' sslmode=prefer key='id' table="public"."evento"</datasource>
+      <keywordList/>
+      <layername>Histórico de Eventos Regulatórios</layername>
+      <srs/>
+      <spatialrefsys>
+        <authid>EPSG:4674</authid>
+        <srid>4674</srid>
+        <description>SIRGAS 2000</description>
+      </spatialrefsys>
+      <provider encoding="UTF-8">postgres</provider>
+    </maplayer>
+    <maplayer type="vector" geometry="NoGeometry" hasScaleBasedVisibilityFlag="0" autoRefreshEnabled="0" readOnly="0">
+      <id>lyr_obrigacao</id>
+      <datasource>dbname='gestao_titulos_minerarios' host='localhost' port='5432' user='pedro' password='123' sslmode=prefer key='id' table="public"."obrigacao"</datasource>
+      <keywordList/>
+      <layername>Prazos e Obrigações Legais</layername>
+      <srs/>
+      <spatialrefsys>
+        <authid>EPSG:4674</authid>
+        <srid>4674</srid>
+        <description>SIRGAS 2000</description>
+      </spatialrefsys>
+      <provider encoding="UTF-8">postgres</provider>
+    </maplayer>
+    <maplayer type="vector" geometry="NoGeometry" hasScaleBasedVisibilityFlag="0" autoRefreshEnabled="0" readOnly="0">
+      <id>lyr_painel_consolidado</id>
+      <datasource>dbname='gestao_titulos_minerarios' host='localhost' port='5432' user='pedro' password='123' sslmode=prefer key='tipo_obrigacao' table="public"."vw_painel_prazos_consolidado"</datasource>
+      <keywordList/>
+      <layername>Painel Consolidado de Conformidade</layername>
+      <srs/>
+      <spatialrefsys>
+        <authid>EPSG:4674</authid>
+        <srid>4674</srid>
+        <description>SIRGAS 2000</description>
+      </spatialrefsys>
+      <provider encoding="UTF-8">postgres</provider>
+    </maplayer>
+    <maplayer type="vector" geometry="NoGeometry" hasScaleBasedVisibilityFlag="0" autoRefreshEnabled="0" readOnly="0">
+      <id>lyr_alertas_urgentes</id>
+      <datasource>dbname='gestao_titulos_minerarios' host='localhost' port='5432' user='pedro' password='123' sslmode=prefer key='obrigacao_id' table="public"."vw_painel_alertas_urgentes"</datasource>
+      <keywordList/>
+      <layername>Alertas Urgentes (Ação Imediata)</layername>
+      <srs/>
+      <spatialrefsys>
+        <authid>EPSG:4674</authid>
+        <srid>4674</srid>
+        <description>SIRGAS 2000</description>
+      </spatialrefsys>
+      <provider encoding="UTF-8">postgres</provider>
+    </maplayer>
+  </projectlayers>
+  <relations>
+    <relation id="rel_titular_processo" name="Processos Minerários do Titular" referencingLayer="lyr_processo" referencedLayer="lyr_titular" strength="Association">
+      <fieldRef referencingField="titular_id" referencedField="id"/>
+    </relation>
+    <relation id="rel_processo_evento" name="Histórico de Eventos Regulatórios" referencingLayer="lyr_evento" referencedLayer="lyr_processo" strength="Composition">
+      <fieldRef referencingField="processo_id" referencedField="id"/>
+    </relation>
+    <relation id="rel_processo_obrigacao" name="Prazos e Obrigações Legais ANM" referencingLayer="lyr_obrigacao" referencedLayer="lyr_processo" strength="Composition">
+      <fieldRef referencingField="processo_id" referencedField="id"/>
+    </relation>
+  </relations>
+</qgis>

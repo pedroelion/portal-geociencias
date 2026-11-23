@@ -1,0 +1,22 @@
+# Python Bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+
+# SQLite e Bancos Locais
+*.db-journal
+*.sqlite3
+
+# Ambientes e Variáveis
+.env
+.env.*
+venv/
+.venv/
+
+# Sistema Operacional e IDE
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.log

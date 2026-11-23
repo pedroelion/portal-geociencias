@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Sistema de extração e gerenciamento de lineamentos estruturais com Modelos Digitais de Elevação (SRTM 30m e 90m).">
+    <title>SRTM Lineament Studio | Extração de Lineamentos Estruturais</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- CSS Estilos -->
+    <link rel="stylesheet" href="/static/lineamentos/css/styler.css">
+</head>
+<body>
+    <div class="app-layout">
+        <!-- Barra de Navegação Superior -->
+        <header class="app-header">
+            <div class="header-brand">
+                <div class="brand-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon>
+                        <line x1="8" y1="2" x2="8" y2="18"></line>
+                        <line x1="16" y1="6" x2="16" y2="22"></line>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="brand-title">SRTM Lineament Studio</h1>
+                    <p class="brand-subtitle">Projeto 4: Extração de Lineamentos Estruturais com Modelos Digitais de Elevação</p>
+                </div>
+            </div>
+
+            <div class="header-badges">
+                <a href="/" class="badge" style="text-decoration:none; background:rgba(255,255,255,0.08); color:#f8fafc; font-weight:600;">🏠 Portal de Geociências</a>
+                <div class="badge badge-network" title="Conexão IPv6 Ativa">
+                    <span class="status-dot pulse"></span>
+                    <span>IPv6 Dual-Stack [::]:8080</span>
+                </div>
+                <div class="badge badge-tech" title="Backend Nativo Python + SQLite">
+                    <span class="tech-tag">Python http.server</span>
+                    <span class="tech-tag">SQLite3</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Conteúdo Principal -->
+        <main class="app-main">
+            <!-- Painel de Métricas -->
+            <section class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon-wrapper blue">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                    </div>
+                    <div>
+                        <span class="stat-label">Total de Projetos</span>
+                        <div class="stat-value" id="stat-total">-</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon-wrapper emerald">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                    </div>
+                    <div>
+                        <span class="stat-label">Concluídos com Sucesso</span>
+                        <div class="stat-value" id="stat-concluidos">-</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon-wrapper amber">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                    </div>
+                    <div>
+                        <span class="stat-label">Em Processamento</span>
+                        <div class="stat-value" id="stat-processando">-</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon-wrapper purple">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                    </div>
+                    <div>
+                        <span class="stat-label">Sensor Principal</span>
+                        <div class="stat-value text-sm">SRTM 1" / 3" Arc-Sec</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Painel Central: Formulário de Cadastro e Visualizador Geológico -->
+            <div class="workspace-grid">
+                <!-- Card 1: Formulário de Nova Análise -->
+                <div class="content-card">
+                    <div class="card-header">
+                        <div class="card-title-group">
+                            <h2 class="card-title">Nova Extração de Lineamentos</h2>
+                            <p class="card-subtitle">Cadastre parâmetros do Modelo Digital de Elevação para detecção estrutural</p>
+                        </div>
+                    </div>
+
+                    <form id="form-analise" class="extraction-form">
+                        <div class="form-group">
+                            <label for="nome_projeto" class="form-label">
+                                Nome do Projeto / Província Geológica
+                                <span class="required">*</span>
+                            </label>
+                            <input 
+                                type="text" 
+                                id="nome_projeto" 
+                                name="nome_projeto" 
+                                class="form-input" 
+                                placeholder="Ex: Cinturão Ribeira - Setor Serra do Mar" 
+                                required
+                            >
+                            <span class="field-hint">Identificação da área de interesse tectônico ou estrutural</span>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group flex-1">
+                                <label for="resolucao" class="form-label">Resolução do MDE (SRTM)</label>
+                                <select id="resolucao" name="resolucao" class="form-select">
+                                    <option value="SRTM 30m (1 arc-sec)" selected>SRTM 30m (1 arc-second - Alta precisão)</option>
+                                    <option value="SRTM 90m (3 arc-sec)">SRTM 90m (3 arc-second - Regional)</option>
+                                    <option value="ALOS PALSAR 12.5m">ALOS PALSAR 12.5m (Hi-Res)</option>
+                                    <option value="ASTER GDEM 30m">ASTER GDEM 30m (Óptico)</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group flex-1">
+                                <label for="status" class="form-label">Status da Análise</label>
+                                <select id="status" name="status" class="form-select">
+                                    <option value="Concluído" selected>Concluído</option>
+                                    <option value="Em Processamento">Em Processamento</option>
+                                    <option value="Pendente">Pendente</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="filter-preset-box">
+                            <span class="filter-box-title">Algoritmo / Filtragem de Sombreamento (Hillshade):</span>
+                            <div class="filter-chips">
+                                <span class="chip active">Multidirecional (0°, 45°, 90°, 135°)</span>
+                                <span class="chip">Detecção Canny + Hough</span>
+                                <span class="chip">Filtro Sobel Direcional</span>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" id="btn-submit" class="btn btn-primary">
+                                <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M12 5v14M5 12h14"/>
+                                </svg>
+                                <span>Cadastrar e Processar Extração</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Card 2: Diagrama de Roseta Geológico (Canvas Interativo) -->
+                <div class="content-card visualizer-card">
+                    <div class="card-header">
+                        <div class="card-title-group">
+                            <h2 class="card-title">Diagrama de Roseta (Orientação Azimutal)</h2>
+                            <p class="card-subtitle">Distribuição estatística dos lineamentos por azimute tectônico</p>
+                        </div>
+                    </div>
+                    
+                    <div class="rosette-wrapper">
+                        <canvas id="rosette-canvas" width="280" height="280"></canvas>
+                        <div class="rosette-legend">
+                            <div class="legend-item"><span class="legend-color ne"></span><strong>NE-SW:</strong> 42% (Fraturas Principais)</div>
+                            <div class="legend-item"><span class="legend-color nw"></span><strong>NW-SE:</strong> 33% (Zonas de Cisalhamento)</div>
+                            <div class="legend-item"><span class="legend-color ns"></span><strong>N-S / E-W:</strong> 25% (Falhas Subordinadas)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabela de Histórico de Análises -->
+            <section class="content-card table-section">
+                <div class="table-header-bar">
+                    <div class="table-title-group">
+                        <h2 class="card-title">Histórico de Extrações Estruturais</h2>
+                        <p class="card-subtitle">Registros persistidos na tabela <code>analises_srtm</code> do SQLite</p>
+                    </div>
+                    <div class="table-tools">
+                        <div class="search-box">
+                            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                            <input type="text" id="filtro-busca" placeholder="Buscar projeto ou resolução..." class="search-input">
+                        </div>
+                        <button id="btn-atualizar" class="btn btn-secondary" title="Recarregar dados">
+                            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+                            </svg>
+                            <span>Atualizar</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 80px;">ID</th>
+                                <th>Nome do Projeto</th>
+                                <th>Resolução MDE</th>
+                                <th>Status</th>
+                                <th>Data da Extração</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabela-analises-corpo">
+                            <tr>
+                                <td colspan="5" class="table-loading">Carregando dados do servidor...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+
+        <!-- Rodapé do Sistema -->
+        <footer class="app-footer">
+            <div class="footer-content">
+                <span>Projeto 4: Extração de Lineamentos Estruturais (SRTM) • Padrão MVC em Python Nativo</span>
+                <span>IPv6 Host: <code>2804:14:8286:6b01:a00:27ff:fe6b:96d0</code></span>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- Script da Aplicação -->
+    <script src="/static/lineamentos/js/app.js"></script>
+</body>
+</html>

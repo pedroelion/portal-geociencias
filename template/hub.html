@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Portal Integrado de Geociências e Mineração - Gestão de Títulos ANM e Extração de Lineamentos SRTM em Python Puro (Padrão MVC).">
+    <title>Portal Integrado de Geociências & Mineração | Python Puro MVC</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/portal/css/hub.css">
+</head>
+<body>
+    <div class="portal-wrapper">
+        <!-- Top Navbar -->
+        <header class="portal-header">
+            <div class="brand">
+                <div class="brand-logo">🌐</div>
+                <div>
+                    <h1>Portal Integrado de Geociências & Mineração</h1>
+                    <p class="brand-sub">Ambiente Corporativo Unificado • Padrão Arquitetural MVC • 100% Python Puro (Standard Library)</p>
+                </div>
+            </div>
+            <div class="header-tags">
+                <span class="tag-tech"><span class="pulse-dot"></span> Servidor HTTP Nativo Dual-Stack</span>
+                <span class="tag-tech tag-noframework">Sem Frameworks (Zero Flask/Django)</span>
+                <span class="tag-tech tag-free">Cloud Ready (Deploy Gratuito)</span>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="portal-main">
+
+            <!-- Welcome & Status Banner -->
+            <section class="banner-welcome">
+                <div class="banner-content">
+                    <h2>Hub de Soluções Espaciais e Geológicas</h2>
+                    <p>Acesse de forma centralizada os dois sistemas de geociências desenvolvidos em conformidade com as diretrizes da ANM e técnicas avançadas de sensoriamento remoto, ou execute cada subsistema de forma independente.</p>
+                </div>
+                <div class="banner-status-pill">
+                    <div class="status-indicator">
+                        <span class="status-icon">⚡</span>
+                        <div>
+                            <span class="status-title">Status dos Módulos</span>
+                            <span class="status-desc" id="status-portal-txt">Sincronizando telemetria...</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Metrics Overview -->
+            <section class="kpi-strip">
+                <div class="kpi-card">
+                    <span class="kpi-num" id="kpi-processos">-</span>
+                    <span class="kpi-label">Processos Minerários (ANM)</span>
+                    <span class="kpi-sub">Poligonais PostGIS EPSG:4674</span>
+                </div>
+                <div class="kpi-card kpi-alert">
+                    <span class="kpi-num" id="kpi-obrigacoes">-</span>
+                    <span class="kpi-label">Prazos e Obrigações Legais</span>
+                    <span class="kpi-sub">RFP, TAH, GU e Exigências</span>
+                </div>
+                <div class="kpi-card kpi-accent">
+                    <span class="kpi-num" id="kpi-analises">-</span>
+                    <span class="kpi-label">Projetos de Lineamentos SRTM</span>
+                    <span class="kpi-sub">Modelos Digitais de Elevação</span>
+                </div>
+                <div class="kpi-card kpi-tech">
+                    <span class="kpi-num">100%</span>
+                    <span class="kpi-label">Python Standard Library</span>
+                    <span class="kpi-sub">http.server • sqlite3 • Dual-Stack</span>
+                </div>
+            </section>
+
+            <!-- Systems Grid -->
+            <section class="systems-grid">
+
+                <!-- Card 1: Títulos Minerários -->
+                <div class="system-card card-titulos">
+                    <div class="card-header">
+                        <div class="system-icon">⛏️</div>
+                        <div class="system-title-wrap">
+                            <span class="system-category">Tema 1 • Regulação e Espacial</span>
+                            <h3>Gestão de Títulos Minerários</h3>
+                        </div>
+                    </div>
+
+                    <p class="card-desc">
+                        Sistema corporativo para acompanhamento regulatório e territorial de processos minerários na ANM. Integração com banco PostgreSQL/PostGIS (SRID 4674), triggers automáticos de contagem de prazos legais (Relatório de Pesquisa, Taxa Anual por Hectare, Guia de Utilização) e painel cartográfico com tiles 100% livres de API key.
+                    </p>
+
+                    <div class="tech-pills">
+                        <span class="pill">PostgreSQL 18 + PostGIS 3.6</span>
+                        <span class="pill">SIRGAS 2000 (EPSG:4674)</span>
+                        <span class="pill">QGIS Desktop (1:N)</span>
+                        <span class="pill">Leaflet (Esri & OSM)</span>
+                        <span class="pill">Triggers PL/pgSQL</span>
+                    </div>
+
+                    <div class="card-actions">
+                        <a href="/titulos" class="btn btn-primary">
+                            <span>Abrir Sistema de Títulos</span>
+                            <span class="arrow">→</span>
+                        </a>
+                        <div class="sub-links">
+                            <a href="/api/titulos/painel" target="_blank" class="link-sub">API Painel</a>
+                            <span class="dot-sep">•</span>
+                            <a href="/api/titulos/situacao-espacial" target="_blank" class="link-sub">GeoJSON Espacial</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 2: Extração de Lineamentos -->
+                <div class="system-card card-lineamentos">
+                    <div class="card-header">
+                        <div class="system-icon">🛰️</div>
+                        <div class="system-title-wrap">
+                            <span class="system-category">Projeto 4 • Sensoriamento Remoto</span>
+                            <h3>Extração de Lineamentos Estruturais</h3>
+                        </div>
+                    </div>
+
+                    <p class="card-desc">
+                        Plataforma de geoprocessamento e análise estrutural baseada em Modelos Digitais de Elevação (SRTM 30m e 90m). Gerenciamento de análises morfológicas, persistência em SQLite nativo, cálculo de tendências direcionais e renderização dinâmica de diagramas de roseta geológicos em HTML5 Canvas.
+                    </p>
+
+                    <div class="tech-pills">
+                        <span class="pill">SRTM 30m / 90m (MDE)</span>
+                        <span class="pill">SQLite3 Nativo</span>
+                        <span class="pill">Diagrama de Roseta</span>
+                        <span class="pill">Relevo Sombreado</span>
+                        <span class="pill">Estrutural & Tectônica</span>
+                    </div>
+
+                    <div class="card-actions">
+                        <a href="/lineamentos" class="btn btn-emerald">
+                            <span>Abrir Sistema de Lineamentos</span>
+                            <span class="arrow">→</span>
+                        </a>
+                        <div class="sub-links">
+                            <a href="/api/lineamentos/analises" target="_blank" class="link-sub">API Análises</a>
+                            <span class="dot-sep">•</span>
+                            <a href="/lineamentos" class="link-sub">Novo Projeto MDE</a>
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+
+            <!-- Guide & Independent Execution Section -->
+            <section class="guide-section">
+                <div class="guide-header">
+                    <h3>💻 Guia de Execução: Isolada ou Unificada</h3>
+                    <p>Ambos os sistemas foram construídos para operar de maneira 100% modular, sem dependência mútua obrigatória.</p>
+                </div>
+
+                <div class="code-blocks-grid">
+                    <!-- Execução Unificada -->
+                    <div class="code-card">
+                        <div class="code-header">
+                            <span class="code-dot red"></span>
+                            <span class="code-dot yellow"></span>
+                            <span class="code-dot green"></span>
+                            <span class="code-title">1. Executar os Dois Sistemas Juntos (Portal Unificado)</span>
+                        </div>
+                        <pre class="code-box"><code># A partir da pasta portal_geociencias:
+cd "D:\Pedro\Desktop\portal_geociencias"
+python portal_app.py
+
+# Acesso Unificado no Navegador:
+# Hub:         http://localhost:8000/
+# Títulos:     http://localhost:8000/titulos
+# Lineamentos: http://localhost:8000/lineamentos</code></pre>
+                    </div>
+
+                    <!-- Execução Isolada Títulos -->
+                    <div class="code-card">
+                        <div class="code-header">
+                            <span class="code-dot red"></span>
+                            <span class="code-dot yellow"></span>
+                            <span class="code-dot green"></span>
+                            <span class="code-title">2. Executar Apenas Títulos Minerários</span>
+                        </div>
+                        <pre class="code-box"><code># A partir da pasta do Tema 1:
+cd "D:\Pedro\Desktop\Sistema corporativo de gestão de títulos minerários\gestao_titulos_anm"
+python app.py
+
+# Ou dentro do portal:
+# cd "D:\Pedro\Desktop\portal_geociencias	itulos" && python app.py
+# Acesso: http://localhost:8080/</code></pre>
+                    </div>
+
+                    <!-- Execução Isolada Lineamentos -->
+                    <div class="code-card">
+                        <div class="code-header">
+                            <span class="code-dot red"></span>
+                            <span class="code-dot yellow"></span>
+                            <span class="code-dot green"></span>
+                            <span class="code-title">3. Executar Apenas Lineamentos Estruturais</span>
+                        </div>
+                        <pre class="code-box"><code># A partir da pasta do Projeto 4:
+cd "D:\Pedro\Desktop\Extração de lineamentos estruturais\extracao_lineamentos"
+python app.py
+
+# Ou dentro do portal:
+# cd "D:\Pedro\Desktop\portal_geociencias\lineamentos" && python app.py
+# Acesso: http://localhost:8081/</code></pre>
+                    </div>
+
+                    <!-- Deploy Gratuito -->
+                    <div class="code-card">
+                        <div class="code-header">
+                            <span class="code-dot red"></span>
+                            <span class="code-dot yellow"></span>
+                            <span class="code-dot green"></span>
+                            <span class="code-title">4. Publicação Gratuita na Nuvem (Render / Railway / Fly.io)</span>
+                        </div>
+                        <pre class="code-box"><code># Nenhuma dependência pesada! Comando de Start:
+python portal_app.py
+
+# Variáveis de Ambiente Suportadas:
+PORT=8000
+DATABASE_URL=postgresql://usuario:senha@host:5432/banco
+# Zero senhas fixas no código!</code></pre>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- Footer -->
+        <footer class="portal-footer">
+            <p>Portal Corporativo de Geociências &copy; 2026 • Desenvolvido com Padrão Arquitetural MVC e Python Puro.</p>
+        </footer>
+    </div>
+
+    <script src="/static/portal/js/hub.js"></script>
+</body>
+</html>

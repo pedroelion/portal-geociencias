@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema Corporativo de Gestão de Títulos Minerários | ANM - SIGMINE</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- App CSS -->
+    <link rel="stylesheet" href="/static/titulos/css/styler.css">
+</head>
+<body>
+
+    <!-- Header Corporativo -->
+    <header class="app-header">
+        <div class="header-left">
+            <div class="logo-icon">⛏️</div>
+            <div>
+                <h1>Gestão de Títulos Minerários</h1>
+                <p class="subtitle">Controle Regulatório ANM • Prazos Legais e Alertas Espaciais • PostGIS & QGIS</p>
+            </div>
+        </div>
+        <div class="header-right">
+            <span class="badge-tech">PostgreSQL 18 + PostGIS 3.6</span>
+            <span class="badge-tech">SIRGAS 2000 (EPSG:4674)</span>
+            <a href="/" class="btn btn-secondary btn-sm" style="text-decoration:none; margin-right: 8px;">🏠 Portal</a>
+            <button class="btn btn-primary" onclick="abrirModalEvento()">+ Novo Evento ANM</button>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="dashboard-container">
+
+        <!-- Top KPIs -->
+        <section class="kpi-grid">
+            <div class="kpi-card" id="kpi-processos">
+                <div class="kpi-label">Processos Minerários</div>
+                <div class="kpi-value" id="val-total-processos">-</div>
+                <div class="kpi-sub">Poligonais Ativas no SIGMINE</div>
+            </div>
+            <div class="kpi-card kpi-danger" id="kpi-vencidos">
+                <div class="kpi-label">Obrigações Vencidas</div>
+                <div class="kpi-value" id="val-vencidas">-</div>
+                <div class="kpi-sub">Ação Imediata Necessária</div>
+            </div>
+            <div class="kpi-card kpi-warning" id="kpi-critico">
+                <div class="kpi-label">Alerta Crítico (≤ 30 dias)</div>
+                <div class="kpi-value" id="val-criticos">-</div>
+                <div class="kpi-sub">Vencimento Próximo</div>
+            </div>
+            <div class="kpi-card kpi-success" id="kpi-prazo">
+                <div class="kpi-label">No Prazo (> 30 dias)</div>
+                <div class="kpi-value" id="val-no-prazo">-</div>
+                <div class="kpi-sub">Conformidade Regular</div>
+            </div>
+            <div class="kpi-card kpi-info" id="kpi-conformidade">
+                <div class="kpi-label">Taxa de Conformidade</div>
+                <div class="kpi-value" id="val-conformidade">-%</div>
+                <div class="kpi-sub">Cumprimento de Prazos ANM</div>
+            </div>
+        </section>
+
+        <!-- Split Map + Urgent Alerts -->
+        <section class="split-view">
+            <!-- Left: Interactive Spatial Map -->
+            <div class="panel map-panel">
+                <div class="panel-header">
+                    <div class="map-title-wrap">
+                        <h2>🗺️ Mapa Territorial de Poligonais Minerárias</h2>
+                        <span class="badge-map-free">Camadas Livres (Esri / OSM)</span>
+                    </div>
+                    <div class="map-actions">
+                        <button class="btn btn-secondary btn-sm" onclick="ajustarZoomPoligonais()" title="Enquadrar todas as poligonais minerárias">🎯 Enquadrar</button>
+                    </div>
+                </div>
+                <div class="legend-inline">
+                    <span class="legend-pill vencido"><span class="dot"></span> Vencido</span>
+                    <span class="legend-pill critico"><span class="dot"></span> Alerta Crítico</span>
+                    <span class="legend-pill prazo"><span class="dot"></span> No Prazo</span>
+                    <span class="legend-pill cumprido"><span class="dot"></span> Regular</span>
+                </div>
+                <div id="map"></div>
+            </div>
+
+            <!-- Right: Urgent Alerts Panel -->
+            <div class="panel alerts-panel">
+                <div class="panel-header">
+                    <h2>⚠️ Alertas Prioritários (Ação Imediata)</h2>
+                    <span class="badge-count" id="badge-urgentes">0</span>
+                </div>
+                <div class="alerts-list" id="lista-alertas-urgentes">
+                    <p class="placeholder-text">Carregando alertas prioritários...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tabbed Section -->
+        <section class="panel tabs-section">
+            <div class="tabs-header">
+                <button class="tab-btn active" onclick="trocarAba('aba-processos')">Processos Minerários</button>
+                <button class="tab-btn" onclick="trocarAba('aba-painel')">Painel Consolidado de Prazos</button>
+                <button class="tab-btn" onclick="trocarAba('aba-eventos')">Histórico de Eventos</button>
+                <button class="tab-btn" onclick="trocarAba('aba-obrigacoes')">Prazos e Obrigações Legais</button>
+            </div>
+
+            <!-- Aba 1: Processos -->
+            <div id="aba-processos" class="tab-content active">
+                <div class="table-toolbar">
+                    <input type="text" id="filtro-busca-processo" placeholder="🔍 Filtrar por número, titular, município..." onkeyup="filtrarTabelaProcessos()">
+                    <select id="filtro-alerta-processo" onchange="carregarProcessos()">
+                        <option value="">Todos os Níveis de Alerta</option>
+                        <option value="Vencido">Vencido</option>
+                        <option value="Alerta Crítico / Próximo ao Vencimento">Alerta Crítico (≤ 30d)</option>
+                        <option value="No Prazo">No Prazo</option>
+                        <option value="Cumprido / Regular">Regular / Cumprido</option>
+                    </select>
+                </div>
+                <div class="table-responsive">
+                    <table class="data-table" id="tabela-processos">
+                        <thead>
+                            <tr>
+                                <th>Processo ANM</th>
+                                <th>Titular</th>
+                                <th>Fase</th>
+                                <th>Substância</th>
+                                <th>Área (ha)</th>
+                                <th>Localização</th>
+                                <th>Pior Alerta</th>
+                                <th>Próxima Obrigação</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="corpo-tabela-processos">
+                            <tr><td colspan="9" class="loading">Carregando processos...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Aba 2: Painel Consolidado de Prazos -->
+            <div id="aba-painel" class="tab-content">
+                <div class="table-responsive">
+                    <table class="data-table" id="tabela-painel-consolidado">
+                        <thead>
+                            <tr>
+                                <th>Tipo de Obrigação Legal</th>
+                                <th>Total</th>
+                                <th>Pendentes</th>
+                                <th>Vencidas</th>
+                                <th>Alerta Crítico (≤30d)</th>
+                                <th>No Prazo (>30d)</th>
+                                <th>Cumpridas</th>
+                                <th>Valor Pendente (R$)</th>
+                                <th>Conformidade</th>
+                            </tr>
+                        </thead>
+                        <tbody id="corpo-tabela-painel">
+                            <tr><td colspan="9" class="loading">Carregando painel de conformidade...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Aba 3: Eventos -->
+            <div id="aba-eventos" class="tab-content">
+                <div class="table-responsive">
+                    <table class="data-table" id="tabela-eventos">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Processo</th>
+                                <th>Tipo de Evento</th>
+                                <th>Documento SEI / DOU</th>
+                                <th>Responsável</th>
+                                <th>Descrição</th>
+                            </tr>
+                        </thead>
+                        <tbody id="corpo-tabela-eventos">
+                            <tr><td colspan="6" class="loading">Carregando histórico regulatório...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Aba 4: Obrigações -->
+            <div id="aba-obrigacoes" class="tab-content">
+                <div class="table-responsive">
+                    <table class="data-table" id="tabela-obrigacoes">
+                        <thead>
+                            <tr>
+                                <th>Processo</th>
+                                <th>Obrigação</th>
+                                <th>Vencimento</th>
+                                <th>Dias Restantes</th>
+                                <th>Nível de Alerta</th>
+                                <th>Valor Devido</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="corpo-tabela-obrigacoes">
+                            <tr><td colspan="8" class="loading">Carregando prazos e obrigações...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- Modal Novo Evento ANM -->
+    <div class="modal-overlay" id="modal-evento">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>📋 Registrar Novo Evento Regulatório ANM</h3>
+                <button class="modal-close" onclick="fecharModalEvento()">&times;</button>
+            </div>
+            <form id="form-novo-evento" onsubmit="enviarNovoEvento(event)">
+                <div class="form-group">
+                    <label>Processo Minerário *</label>
+                    <select id="ev-processo-id" required>
+                        <option value="">Selecione o processo...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Tipo de Evento *</label>
+                    <select id="ev-tipo-evento" required>
+                        <option value="Publicação de Alvará de Pesquisa no DOU">Publicação de Alvará de Pesquisa no DOU (Gera RFP e TAH automaticamente)</option>
+                        <option value="Pagamento de TAH">Pagamento de TAH (Dá baixa na anuidade pendente)</option>
+                        <option value="Protocolo de Relatório Final de Pesquisa">Protocolo de Relatório Final de Pesquisa (Dá baixa no RFP)</option>
+                        <option value="Emissão de Guia de Utilização">Emissão de Guia de Utilização (Gera acompanhamento de GU)</option>
+                        <option value="Notificação / Exigência ANM">Notificação / Exigência ANM (Prazo de 60 dias)</option>
+                        <option value="Prorrogação de Alvará de Pesquisa">Prorrogação de Alvará de Pesquisa</option>
+                        <option value="Aprovação de Relatório de Pesquisa">Aprovação de Relatório de Pesquisa</option>
+                        <option value="Publicação de Portaria de Lavra">Publicação de Portaria de Lavra</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <div class="form-group col">
+                        <label>Data do Evento *</label>
+                        <input type="date" id="ev-data-evento" required>
+                    </div>
+                    <div class="form-group col">
+                        <label>Documento SEI / DOU</label>
+                        <input type="text" id="ev-documento-sei" placeholder="ex.: SEI-02100.123456/2026">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Responsável / Órgão</label>
+                    <input type="text" id="ev-responsavel" placeholder="ex.: ANM - Gerência Regional MG">
+                </div>
+                <div class="form-group">
+                    <label>Descrição do Marco Regulatório</label>
+                    <textarea id="ev-descricao" rows="3" placeholder="Informações adicionais do despacho ou publicação..."></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="fecharModalEvento()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary" id="btn-salvar-evento">Salvar Evento</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- App JS -->
+    <script src="/static/titulos/js/app.js"></script>
+</body>
+</html>
