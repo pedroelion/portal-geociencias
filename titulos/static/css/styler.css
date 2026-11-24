@@ -1010,3 +1010,198 @@ body {
         font-size: 0.72rem;
     }
 }
+
+/* ==============================================================================
+   ESTILOS: MODAL DE ANÁLISE ESPACIAL POSTGIS & CRUZAMENTO TECTÔNICO SRTM
+   ============================================================================== */
+.modal-card-lg {
+    max-width: 760px;
+    width: 95%;
+}
+
+.modal-body-espacial {
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.15rem;
+    max-height: 75vh;
+    overflow-y: auto;
+}
+
+.analise-header-box {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(139, 92, 246, 0.08);
+    border: 1px solid rgba(139, 92, 246, 0.2);
+    border-radius: var(--radius-md);
+    padding: 0.85rem 1.1rem;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.analise-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 0.75rem;
+}
+
+.analise-kpi-item {
+    background: rgba(14, 16, 28, 0.75);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: 0.75rem 0.9rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.analise-kpi-label {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.analise-kpi-val {
+    font-size: 1.15rem;
+    color: #f8fafc;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+}
+
+.analise-kpi-sub {
+    font-size: 0.68rem;
+    color: var(--color-sky);
+}
+
+.cross-module-section {
+    background: rgba(10, 12, 22, 0.6);
+    border: 1px solid rgba(56, 189, 248, 0.16);
+    border-radius: var(--radius-md);
+    padding: 1rem;
+}
+
+.lineamentos-cross-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+}
+
+.lineamento-card-cross {
+    background: rgba(16, 18, 32, 0.8);
+    border: 1px solid rgba(139, 92, 246, 0.15);
+    border-radius: var(--radius-sm);
+    padding: 0.75rem;
+    transition: all 0.2s ease;
+}
+
+.lineamento-card-cross:hover {
+    border-color: rgba(139, 92, 246, 0.35);
+    background: rgba(22, 24, 42, 0.9);
+}
+
+/* ==============================================================================
+   REGRAS DE IMPRESSÃO LIMPA (@media print) PARA RELATÓRIO TÉCNICO GERENCIAL
+   ============================================================================== */
+@media print {
+    body {
+        background: #ffffff !important;
+        color: #0f172a !important;
+        font-size: 10pt;
+    }
+
+    .app-header,
+    .nav-portal-link,
+    .header-actions-group,
+    .map-panel,
+    .alerts-panel,
+    .tabs-header,
+    .table-toolbar,
+    .modal-overlay,
+    .badge-map-free,
+    .btn,
+    button {
+        display: none !important;
+    }
+
+    .dashboard-container {
+        padding: 0 !important;
+        max-width: 100% !important;
+    }
+
+    .panel {
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+    }
+
+    .kpi-grid {
+        grid-template-columns: repeat(5, 1fr) !important;
+        gap: 0.5rem !important;
+        margin-bottom: 1.5rem !important;
+    }
+
+    .kpi-card {
+        border: 1px solid #cbd5e1 !important;
+        background: #f8fafc !important;
+        color: #0f172a !important;
+        padding: 0.5rem !important;
+    }
+
+    .kpi-value {
+        color: #0f172a !important;
+        font-size: 1.25rem !important;
+    }
+
+    .kpi-label, .kpi-sub {
+        color: #475569 !important;
+    }
+
+    .tab-content {
+        display: block !important;
+    }
+
+    #aba-processos {
+        display: block !important;
+    }
+
+    #aba-painel, #aba-eventos, #aba-obrigacoes {
+        display: none !important;
+    }
+
+    .data-table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+        font-size: 9pt !important;
+    }
+
+    .data-table th,
+    .data-table td {
+        border: 1px solid #cbd5e1 !important;
+        color: #0f172a !important;
+        padding: 6px 8px !important;
+        background: transparent !important;
+    }
+
+    .data-table th {
+        background: #f1f5f9 !important;
+        font-weight: 700 !important;
+    }
+
+    .badge-status {
+        background: transparent !important;
+        border: 1px solid #94a3b8 !important;
+        color: #0f172a !important;
+        font-weight: 600 !important;
+    }
+
+    .data-table td:last-child {
+        display: none !important; /* Esconde coluna de Ações */
+    }
+
+    .data-table th:last-child {
+        display: none !important;
+    }
+}
+

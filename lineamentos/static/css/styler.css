@@ -1204,3 +1204,163 @@ body {
         font-size: 0.98rem;
     }
 }
+
+/* ==============================================================================
+   ESTILOS: PAINEL DE COMPARAÇÃO ESTRUTURAL ENTRE PROJETOS SRTM
+   ============================================================================== */
+.compare-section {
+    margin-bottom: 2rem;
+}
+
+.compare-selectors-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    background: rgba(14, 16, 28, 0.7);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.25rem;
+    flex-wrap: wrap;
+}
+
+.compare-select-wrap {
+    flex: 1;
+    min-width: 220px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.compare-label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.compare-divider-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent-violet);
+    padding: 0.5rem;
+}
+
+.compare-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+    margin-bottom: 1.25rem;
+}
+
+.compare-card {
+    background: rgba(16, 18, 32, 0.75);
+    border: 1px solid rgba(139, 92, 246, 0.18);
+    border-radius: var(--radius-md);
+    padding: 1.25rem;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    transition: all 0.2s ease;
+}
+
+.compare-card:hover {
+    border-color: rgba(139, 92, 246, 0.35);
+    background: rgba(22, 24, 42, 0.85);
+}
+
+.compare-card-tag {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 0.2rem 0.55rem;
+    border-radius: 4px;
+    font-family: var(--font-mono);
+}
+
+.compare-card-tag.a {
+    background: rgba(139, 92, 246, 0.18);
+    color: #c084fc;
+    border: 1px solid rgba(139, 92, 246, 0.3);
+}
+
+.compare-card-tag.b {
+    background: rgba(56, 189, 248, 0.18);
+    color: #38bdf8;
+    border: 1px solid rgba(56, 189, 248, 0.3);
+}
+
+.compare-project-title {
+    font-size: 1.05rem;
+    color: #f8fafc;
+    font-weight: 700;
+    margin: 0;
+    padding-right: 5rem;
+}
+
+.compare-metrics-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding-top: 0.75rem;
+}
+
+.compare-metric-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+}
+
+.compare-metric-row strong {
+    color: #f8fafc;
+    font-family: var(--font-mono);
+}
+
+.compare-insights-box {
+    background: rgba(139, 92, 246, 0.08);
+    border: 1px solid rgba(139, 92, 246, 0.22);
+    border-radius: var(--radius-md);
+    padding: 1rem 1.25rem;
+}
+
+.insight-badge-title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #c084fc;
+    letter-spacing: 0.04em;
+    margin-bottom: 0.35rem;
+}
+
+.insight-text {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #e2e8f0;
+    line-height: 1.5;
+}
+
+@media (max-width: 768px) {
+    .compare-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .compare-selectors-bar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .compare-divider-icon {
+        transform: rotate(90deg);
+        padding: 0.25rem;
+    }
+}
+

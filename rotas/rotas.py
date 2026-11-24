@@ -120,12 +120,22 @@ class RoteadorPortal(BaseHTTPRequestHandler):
             if path in ["/api/processos", "/api/titulos/processos"]:
                 f_fase = query.get("fase", [None])[0]
                 f_alerta = query.get("alerta", [None])[0]
-                dados = ProcessoControle.listar_processos(f_fase, f_alerta)
+                f_uf = query.get("uf", [None])[0]
+                f_substancia = query.get("substancia", [None])[0]
+                dados = ProcessoControle.listar_processos(f_fase, f_alerta, f_uf, f_substancia)
                 responder_json(self, 200, {"sucesso": True, "processos": dados})
                 return
 
             if (path.startswith("/api/processos/") or path.startswith("/api/titulos/processos/")):
-                parts = path.split("/")
+                parts = [p for p in path.split("/") if p]
+                # Verifica se é rota de analise espacial (/api/processos/<id>/analise-espacial)
+                if len(parts) >= 3 and parts[-1] == "analise-espacial":
+                    proc_id = parts[-2]
+                    if proc_id.isdigit():
+                        analise = ProcessoControle.obter_analise_espacial(int(proc_id))
+                        responder_json(self, 200, {"sucesso": True, "analise_espacial": analise})
+                        return
+
                 proc_id = parts[-1]
                 if proc_id.isdigit():
                     dados = ProcessoControle.obter_processo_detalhado(int(proc_id))

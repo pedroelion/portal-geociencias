@@ -5,6 +5,8 @@
 let mapInstance = null;
 let geojsonLayer = null;
 let todosProcessos = [];
+let camadaLineamentosSRTM = null;
+let processoAlvoAtualId = null;
 
 document.addEventListener("DOMContentLoaded", () => {
     inicializarMapa();
@@ -147,7 +149,10 @@ function inicializarMapa() {
     camadaGrade = criarGradeCartografica(mapInstance);
     camadaGrade.addTo(mapInstance);
 
-    // 3. Controle de Camadas
+    // 3. Camada de Sobreposição de Lineamentos Estruturais (SRTM)
+    camadaLineamentosSRTM = L.layerGroup();
+
+    // 4. Controle de Camadas
     const baseMaps = {
         "Esri Dark Gray (Elegante)": esriDark,
         "OpenStreetMap (Padrão)": osm,
@@ -157,7 +162,8 @@ function inicializarMapa() {
     };
 
     const overlayMaps = {
-        "Grade de Coordenadas (SIRGAS 2000)": camadaGrade
+        "Grade de Coordenadas (SIRGAS 2000)": camadaGrade,
+        "Lineamentos Estruturais (SRTM)": camadaLineamentosSRTM
     };
 
     L.control.layers(baseMaps, overlayMaps, {
@@ -165,7 +171,7 @@ function inicializarMapa() {
         collapsed: true
     }).addTo(mapInstance);
 
-    // 4. Barra de Escala Métrica Oficial
+    // 5. Barra de Escala Métrica Oficial
     L.control.scale({
         metric: true,
         imperial: false,
@@ -173,6 +179,51 @@ function inicializarMapa() {
     }).addTo(mapInstance);
 
     carregarGeoJSON();
+    carregarLineamentosOverlay();
+}
+
+// 1.1. Carregar Overlay de Lineamentos Estruturais (SRTM)
+async function carregarLineamentosOverlay() {
+    try {
+        const resp = await fetch("/api/analises");
+        const json = await resp.json();
+        if (!json.sucesso || !json.analises) return;
+
+        camadaLineamentosSRTM.clearLayers();
+
+        json.analises.forEach(projeto => {
+            if (projeto.lineamentos_features && Array.isArray(projeto.lineamentos_features)) {
+                projeto.lineamentos_features.forEach(f => {
+                    const coords = f.geometry.coordinates.map(c => [c[1], c[0]]);
+                    const tend = f.properties.tendencia || "NE-SW";
+
+                    let corLinha = "#c084fc"; // NE-SW
+                    if (tend === "NW-SE") corLinha = "#38bdf8";
+                    else if (tend === "E-W") corLinha = "#fbbf24";
+                    else if (tend === "N-S") corLinha = "#34d399";
+
+                    const poly = L.polyline(coords, {
+                        color: corLinha,
+                        weight: 2.2,
+                        opacity: 0.85,
+                        dashArray: ""
+                    });
+
+                    poly.bindTooltip(`
+                        <div style="font-size: 11px;">
+                            <strong>Lineamento ${tend} (SRTM)</strong><br>
+                            Azimute: ${f.properties.azimute}° &bull; Extensão: ${f.properties.comprimento_km} km<br>
+                            <span style="color: #94a3b8;">Projeto: ${projeto.nome_projeto}</span>
+                        </div>
+                    `, { className: "map-tooltip", sticky: true });
+
+                    camadaLineamentosSRTM.addLayer(poly);
+                });
+            }
+        });
+    } catch (e) {
+        console.warn("Overlay de lineamentos SRTM em stand-by:", e);
+    }
 }
 
 // 2. Carregar Camada Espacial GeoJSON do PostGIS
@@ -228,7 +279,7 @@ async function carregarGeoJSON() {
 
                 // Popup detalhado com dados cadastrais e prazos
                 const popupContent = `
-                    <div style="font-family: 'Inter', sans-serif; min-width: 240px; color: #f8fafc;">
+                    <div style="font-family: 'Inter', sans-serif; min-width: 250px; color: #f8fafc;">
                         <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.12); padding-bottom: 6px; margin-bottom: 8px;">
                             <h4 style="margin: 0; color: #38bdf8; font-size: 14px;">ANM: ${p.numero_processo}</h4>
                             <span style="font-size: 10px; background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; font-family: monospace;">EPSG:4674</span>
@@ -248,6 +299,14 @@ async function carregarGeoJSON() {
                                 Vencimento em: <strong>${p.proxima_obrigacao_dias !== null ? p.proxima_obrigacao_dias + ' dias' : '-'}</strong>
                             </p>
                         ` : ''}
+                        <button class="btn btn-primary btn-sm" onclick="abrirModalAnaliseEspacial(${p.processo_id})" style="margin-top: 10px; width: 100%; justify-content: center;">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                                <polyline points="2 17 12 22 22 17"></polyline>
+                                <polyline points="2 12 12 17 22 12"></polyline>
+                            </svg>
+                            <span>Análise Espacial PostGIS</span>
+                        </button>
                     </div>
                 `;
                 layer.bindPopup(popupContent);
@@ -395,12 +454,14 @@ async function carregarProcessos() {
     }
 }
 
+let processosFiltradosCache = [];
+
 function renderizarTabelaProcessos(processos) {
     const tbody = document.getElementById("corpo-tabela-processos");
     tbody.innerHTML = "";
 
     if (processos.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="9" class="loading">Nenhum processo encontrado.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="9" class="loading">Nenhum processo encontrado com os filtros selecionados.</td></tr>';
         return;
     }
 
@@ -425,22 +486,70 @@ function renderizarTabelaProcessos(processos) {
                 ` : '<span style="color: #64748b;">-</span>'}
             </td>
             <td>
-                <button class="btn btn-secondary btn-sm" onclick="centralizarMapa(${p.processo_id})">Ver no Mapa</button>
+                <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                    <button class="btn btn-secondary btn-sm" onclick="centralizarMapa(${p.processo_id})" title="Enquadrar no Mapa">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="22" y1="12" x2="18" y2="12"></line>
+                            <line x1="6" y1="12" x2="2" y2="12"></line>
+                        </svg>
+                        <span>Mapa</span>
+                    </button>
+                    <button class="btn btn-primary btn-sm" onclick="abrirModalAnaliseEspacial(${p.processo_id})" title="Análise Espacial PostGIS & Cruzamento SRTM">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                            <polyline points="2 17 12 22 22 17"></polyline>
+                        </svg>
+                        <span>PostGIS</span>
+                    </button>
+                </div>
             </td>
         `;
         tbody.appendChild(tr);
     });
 }
 
-function filtrarTabelaProcessos() {
-    const termo = document.getElementById("filtro-busca-processo").value.toLowerCase();
-    const filtrados = todosProcessos.filter(p => 
-        p.numero_processo.toLowerCase().includes(termo) ||
-        p.titular_razao_social.toLowerCase().includes(termo) ||
-        p.substancia_mineral.toLowerCase().includes(termo) ||
-        p.municipio.toLowerCase().includes(termo)
-    );
-    renderizarTabelaProcessos(filtrados);
+function filtrarProcessosDinamico() {
+    const termo = (document.getElementById("filtro-busca-processo")?.value || "").toLowerCase().trim();
+    const uf = (document.getElementById("filtro-uf-processo")?.value || "").trim();
+    const substancia = (document.getElementById("filtro-substancia-processo")?.value || "").toLowerCase().trim();
+    const alerta = (document.getElementById("filtro-alerta-processo")?.value || "").trim();
+
+    processosFiltradosCache = todosProcessos.filter(p => {
+        const matchTermo = !termo || 
+            (p.numero_processo || "").toLowerCase().includes(termo) ||
+            (p.titular_razao_social || "").toLowerCase().includes(termo) ||
+            (p.municipio || "").toLowerCase().includes(termo);
+
+        const matchUf = !uf || (p.uf === uf);
+        const matchSubstancia = !substancia || (p.substancia_mineral || "").toLowerCase().includes(substancia);
+        const matchAlerta = !alerta || (p.pior_nivel_alerta === alerta);
+
+        return matchTermo && matchUf && matchSubstancia && matchAlerta;
+    });
+
+    renderizarTabelaProcessos(processosFiltradosCache);
+
+    // Destaque visual sincronizado no mapa Leaflet
+    if (geojsonLayer) {
+        const idsVisiveis = new Set(processosFiltradosCache.map(p => p.processo_id));
+        geojsonLayer.eachLayer(layer => {
+            const pid = layer.feature?.properties?.processo_id;
+            if (idsVisiveis.has(pid)) {
+                layer.setStyle({ opacity: 1, fillOpacity: 0.65 });
+            } else {
+                layer.setStyle({ opacity: 0.15, fillOpacity: 0.05 });
+            }
+        });
+    }
+}
+
+function limparFiltrosProcessos() {
+    if (document.getElementById("filtro-busca-processo")) document.getElementById("filtro-busca-processo").value = "";
+    if (document.getElementById("filtro-uf-processo")) document.getElementById("filtro-uf-processo").value = "";
+    if (document.getElementById("filtro-substancia-processo")) document.getElementById("filtro-substancia-processo").value = "";
+    if (document.getElementById("filtro-alerta-processo")) document.getElementById("filtro-alerta-processo").value = "";
+    filtrarProcessosDinamico();
 }
 
 // 6. Carregar Eventos
@@ -639,4 +748,177 @@ function ajustarZoomPoligonais() {
         mapInstance.fitBounds(geojsonLayer.getBounds(), { padding: [35, 35] });
     }
 }
+
+// =============================================================================
+// 10. Análise Espacial PostGIS e Cruzamento com Lineamentos SRTM
+// =============================================================================
+async function abrirModalAnaliseEspacial(processoId) {
+    processoAlvoAtualId = processoId;
+    const modal = document.getElementById("modal-analise-espacial");
+    const container = document.getElementById("conteudo-analise-espacial");
+    if (!modal || !container) return;
+
+    modal.classList.add("active");
+    container.innerHTML = `
+        <div class="loading-wrap" style="text-align: center; padding: 30px;">
+            <p style="color: #94a3b8; font-size: 14px;">Consultando métricas geodésicas PostGIS (ST_Area, ST_Perimeter, ST_Centroid)...</p>
+        </div>
+    `;
+
+    try {
+        const resp = await fetch(`/api/processos/${processoId}/analise-espacial`);
+        const json = await resp.json();
+
+        if (!json.sucesso || !json.analise_espacial) {
+            container.innerHTML = `<p style="color:#ef4444; padding: 20px;">Falha ao carregar métricas espaciais do PostGIS.</p>`;
+            return;
+        }
+
+        const a = json.analise_espacial;
+
+        let lineamentosHtml = "";
+        if (a.lineamentos_srtm_proximos && a.lineamentos_srtm_proximos.length > 0) {
+            lineamentosHtml = a.lineamentos_srtm_proximos.map(l => `
+                <div class="lineamento-card-cross">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                        <strong style="color: #c084fc; font-size: 13px;">${l.nome_projeto}</strong>
+                        <span class="badge-tech">${l.distancia_km} km da poligonal</span>
+                    </div>
+                    <div style="font-size: 12px; color: #cbd5e1; margin-bottom: 4px;">
+                        <span>Resolução: ${l.resolucao}</span> &bull; 
+                        <span style="color: #38bdf8; font-weight: 600;">Direção: ${l.azimute_predominante}</span> &bull;
+                        <span>${l.total_lineamentos} fraturas</span>
+                    </div>
+                    <div style="font-size: 11px; color: #a78bfa; background: rgba(139, 92, 246, 0.1); padding: 5px 8px; border-radius: 4px; border-left: 2px solid #8b5cf6;">
+                        ${l.intersecao_estrutural}
+                    </div>
+                </div>
+            `).join("");
+        } else {
+            lineamentosHtml = `<p class="placeholder-text">Nenhum projeto SRTM identificado no raio geológico imediato.</p>`;
+        }
+
+        container.innerHTML = `
+            <div class="analise-header-box">
+                <div>
+                    <h4 style="margin: 0; color: #38bdf8; font-size: 16px;">Processo ANM: ${a.numero_processo}</h4>
+                    <p style="margin: 3px 0 0; font-size: 12px; color: #94a3b8;">Substância: <strong style="color:#f8fafc;">${a.substancia_mineral}</strong> &bull; Sistema Geodésico: <strong>${a.srid}</strong></p>
+                </div>
+                <span class="badge-status prazo">${a.status_tectonico}</span>
+            </div>
+
+            <div class="analise-kpi-grid">
+                <div class="analise-kpi-item">
+                    <span class="analise-kpi-label">Área PostGIS (ST_Area)</span>
+                    <strong class="analise-kpi-val">${a.area_calculada_postgis_ha.toLocaleString("pt-BR")} ha</strong>
+                    <span class="analise-kpi-sub">Geodésica na elipsoide</span>
+                </div>
+                <div class="analise-kpi-item">
+                    <span class="analise-kpi-label">Perímetro Geodésico</span>
+                    <strong class="analise-kpi-val">${a.perimetro_km} km</strong>
+                    <span class="analise-kpi-sub">ST_Perimeter(geography)</span>
+                </div>
+                <div class="analise-kpi-item">
+                    <span class="analise-kpi-label">Centroide SIRGAS 2000</span>
+                    <strong class="analise-kpi-val" style="font-size: 13px;">${a.centroide_lat.toFixed(4)}°, ${a.centroide_lng.toFixed(4)}°</strong>
+                    <span class="analise-kpi-sub">ST_Centroid(geom)</span>
+                </div>
+                <div class="analise-kpi-item">
+                    <span class="analise-kpi-label">Processos Vizinhos (25km)</span>
+                    <strong class="analise-kpi-val">${a.processos_vizinhos_25km}</strong>
+                    <span class="analise-kpi-sub">ST_DWithin no PostGIS</span>
+                </div>
+            </div>
+
+            <div class="cross-module-section">
+                <h5 style="margin: 0 0 10px; color: #f8fafc; font-size: 13px; display: flex; align-items: center; gap: 6px;">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon>
+                        <line x1="8" y1="2" x2="8" y2="18"></line>
+                        <line x1="16" y1="6" x2="16" y2="22"></line>
+                    </svg>
+                    <span>Cruzamento Espacial com Lineamentos Estruturais do MDE (SRTM)</span>
+                </h5>
+                <div class="lineamentos-cross-list">
+                    ${lineamentosHtml}
+                </div>
+            </div>
+        `;
+    } catch (e) {
+        container.innerHTML = `<p style="color:#ef4444; padding: 20px;">Erro ao consultar análise espacial: ${e.message}</p>`;
+    }
+}
+
+function fecharModalAnaliseEspacial() {
+    const modal = document.getElementById("modal-analise-espacial");
+    if (modal) modal.classList.remove("active");
+}
+
+function centralizarMapaProcessoAtual() {
+    if (processoAlvoAtualId) {
+        fecharModalAnaliseEspacial();
+        centralizarMapa(processoAlvoAtualId);
+    }
+}
+
+// =============================================================================
+// 11. Exportação de Relatório Gerencial (CSV) e Impressão / Salvar PDF
+// =============================================================================
+function exportarRelatorioCSV() {
+    const dadosParaExportar = (processosFiltradosCache && processosFiltradosCache.length > 0)
+        ? processosFiltradosCache 
+        : todosProcessos;
+
+    if (!dadosParaExportar || dadosParaExportar.length === 0) {
+        alert("Nenhum processo disponível para exportação.");
+        return;
+    }
+
+    const cabecalho = [
+        "Processo ANM",
+        "Titular",
+        "Fase",
+        "Substância Mineral",
+        "Área (ha)",
+        "Município",
+        "UF",
+        "Pior Alerta Regulatório",
+        "Próxima Obrigação",
+        "Dias Restantes",
+        "Total Obrigações",
+        "Obrigações Pendentes",
+        "Obrigações Vencidas"
+    ];
+
+    const linhas = dadosParaExportar.map(p => [
+        `"${p.numero_processo || ''}"`,
+        `"${(p.titular_razao_social || '').replace(/"/g, '""')}"`,
+        `"${p.fase || ''}"`,
+        `"${p.substancia_mineral || ''}"`,
+        p.area_ha ? p.area_ha.toString().replace('.', ',') : '0',
+        `"${p.municipio || ''}"`,
+        `"${p.uf || ''}"`,
+        `"${p.pior_nivel_alerta || ''}"`,
+        `"${p.proxima_obrigacao_tipo || '-'}"`,
+        p.proxima_obrigacao_dias !== null && p.proxima_obrigacao_dias !== undefined ? p.proxima_obrigacao_dias : '-',
+        p.total_obrigacoes || 0,
+        p.total_pendentes || 0,
+        p.total_vencidas || 0
+    ]);
+
+    const csvContent = "\uFEFF" + [cabecalho.join(";"), ...linhas.map(e => e.join(";"))].join("\r\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `relatorio_gestao_titulos_anm_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+function imprimirRelatorio() {
+    window.print();
+}
+
 

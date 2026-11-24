@@ -35,7 +35,22 @@
                 <span class="badge-tech">PostgreSQL 18 + PostGIS 3.6</span>
                 <span class="badge-tech">SIRGAS 2000 (EPSG:4674)</span>
             </div>
-            <div class="header-actions-group">
+                <button class="btn btn-secondary btn-sm" onclick="exportarRelatorioCSV()" title="Exportar Relatório Gerencial em CSV">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    <span>Exportar CSV</span>
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="imprimirRelatorio()" title="Imprimir / Salvar PDF">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                        <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                        <rect x="6" y="14" width="12" height="8"></rect>
+                    </svg>
+                    <span>Imprimir / PDF</span>
+                </button>
                 <a href="/" class="btn btn-secondary btn-sm nav-portal-link">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
                         <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
@@ -160,15 +175,39 @@
                             <circle cx="11" cy="11" r="8"></circle>
                             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                         </svg>
-                        <input type="text" id="filtro-busca-processo" placeholder="Filtrar por número, titular, município..." onkeyup="filtrarTabelaProcessos()">
+                        <input type="text" id="filtro-busca-processo" placeholder="Buscar por número, titular, município..." onkeyup="filtrarProcessosDinamico()">
                     </div>
-                    <select id="filtro-alerta-processo" onchange="carregarProcessos()">
+                    <select id="filtro-uf-processo" onchange="filtrarProcessosDinamico()">
+                        <option value="">Todas as UFs (Estados)</option>
+                        <option value="MG">Minas Gerais (MG)</option>
+                        <option value="PA">Pará (PA)</option>
+                        <option value="GO">Goiás (GO)</option>
+                        <option value="BA">Bahia (BA)</option>
+                    </select>
+                    <select id="filtro-substancia-processo" onchange="filtrarProcessosDinamico()">
+                        <option value="">Todas as Substâncias</option>
+                        <option value="Minério de Ferro">Minério de Ferro</option>
+                        <option value="Ouro">Ouro</option>
+                        <option value="Cobre">Cobre</option>
+                        <option value="Manganês">Manganês</option>
+                        <option value="Grafita">Grafita</option>
+                        <option value="Lítio">Lítio</option>
+                        <option value="Calcário">Calcário</option>
+                    </select>
+                    <select id="filtro-alerta-processo" onchange="filtrarProcessosDinamico()">
                         <option value="">Todos os Níveis de Alerta</option>
                         <option value="Vencido">Vencido</option>
                         <option value="Alerta Crítico / Próximo ao Vencimento">Alerta Crítico (≤ 30d)</option>
                         <option value="No Prazo">No Prazo</option>
                         <option value="Cumprido / Regular">Regular / Cumprido</option>
                     </select>
+                    <button class="btn btn-secondary btn-sm" onclick="limparFiltrosProcessos()" title="Limpar todos os filtros">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                        <span>Limpar</span>
+                    </button>
                 </div>
                 <div class="table-responsive">
                     <table class="data-table" id="tabela-processos">
@@ -323,6 +362,39 @@
                     <button type="submit" class="btn btn-primary" id="btn-salvar-evento">Salvar Evento</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Modal Análise Espacial PostGIS & Cruzamento Tectônico -->
+    <div class="modal-overlay" id="modal-analise-espacial">
+        <div class="modal-card modal-card-lg">
+            <div class="modal-header">
+                <h3>
+                    <svg class="modal-title-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                        <polyline points="2 17 12 22 22 17"></polyline>
+                        <polyline points="2 12 12 17 22 12"></polyline>
+                    </svg>
+                    <span>Análise Espacial PostGIS &bull; SIRGAS 2000 (EPSG:4674)</span>
+                </h3>
+                <button class="modal-close" onclick="fecharModalAnaliseEspacial()">&times;</button>
+            </div>
+            <div class="modal-body-espacial" id="conteudo-analise-espacial">
+                <p class="placeholder-text">Carregando métricas geodésicas do PostGIS...</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="fecharModalAnaliseEspacial()">Fechar</button>
+                <button type="button" class="btn btn-primary" id="btn-focar-mapa-modal" onclick="centralizarMapaProcessoAtual()">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="22" y1="12" x2="18" y2="12"></line>
+                        <line x1="6" y1="12" x2="2" y2="12"></line>
+                        <line x1="12" y1="6" x2="12" y2="2"></line>
+                        <line x1="12" y1="22" x2="12" y2="18"></line>
+                    </svg>
+                    <span>Enquadrar no Mapa</span>
+                </button>
+            </div>
         </div>
     </div>
 

@@ -7,6 +7,7 @@ let mapInstance = null;
 let camadaLineamentos = null;
 let camadaProjetos = null;
 let camadaAreas = null;
+let camadaPoligonosANM = null;
 let analisesCache = [];
 let projetoAtivoId = null;
 
@@ -173,6 +174,7 @@ function inicializarMapa() {
     camadaLineamentos = L.layerGroup().addTo(mapInstance);
     camadaProjetos = L.layerGroup().addTo(mapInstance);
     camadaAreas = L.layerGroup().addTo(mapInstance);
+    camadaPoligonosANM = L.layerGroup(); // Camada opcional de sobreposição
 
     // Controle de Camadas
     const baseMaps = {
@@ -185,7 +187,8 @@ function inicializarMapa() {
     const overlayMaps = {
         "Lineamentos Estruturais (SRTM)": camadaLineamentos,
         "Centros de Extração": camadaProjetos,
-        "Áreas de Varredura MDE": camadaAreas
+        "Áreas de Varredura MDE": camadaAreas,
+        "Poligonais Minerárias ANM (PostGIS)": camadaPoligonosANM
     };
 
     L.control.layers(baseMaps, overlayMaps, {
@@ -198,6 +201,61 @@ function inicializarMapa() {
         imperial: false,
         position: "bottomleft"
     }).addTo(mapInstance);
+
+    carregarPoligonosANMOverlay();
+}
+
+// 1.1. Carregar Camada Opcional de Sobreposição das Poligonais da ANM (PostGIS)
+async function carregarPoligonosANMOverlay() {
+    try {
+        const resp = await fetch("/api/situacao-espacial");
+        const data = await resp.json();
+        if (!data || !data.features) return;
+
+        camadaPoligonosANM.clearLayers();
+
+        const geoLayer = L.geoJSON(data, {
+            style: (feature) => {
+                const alerta = feature.properties.pior_nivel_alerta;
+                let cor = "#10b981";
+                if (alerta === "Vencido") cor = "#ef4444";
+                else if (alerta === "Alerta Crítico / Próximo ao Vencimento") cor = "#f59e0b";
+                else if (alerta === "Cumprido / Regular") cor = "#3b82f6";
+
+                return {
+                    fillColor: cor,
+                    fillOpacity: 0.35,
+                    color: cor,
+                    weight: 2,
+                    dashArray: "3, 3"
+                };
+            },
+            onEachFeature: (feature, layer) => {
+                const p = feature.properties;
+                layer.bindTooltip(`
+                    <div style="font-size: 11px;">
+                        <strong>ANM: ${p.numero_processo}</strong><br>
+                        ${p.substancia_mineral} &bull; ${p.titular_razao_social}<br>
+                        <span style="color: #cbd5e1;">Área: ${p.area_ha ? p.area_ha.toLocaleString("pt-BR") : '-'} ha</span>
+                    </div>
+                `, { className: "map-tooltip" });
+
+                layer.bindPopup(`
+                    <div style="font-family: 'Plus Jakarta Sans', sans-serif; min-width: 210px; color: #f8fafc;">
+                        <h4 style="margin: 0; color: #38bdf8; font-size: 13px;">Poligonal ANM: ${p.numero_processo}</h4>
+                        <p style="margin: 3px 0; font-size: 11px;"><strong>Titular:</strong> ${p.titular_razao_social}</p>
+                        <p style="margin: 3px 0; font-size: 11px;"><strong>Substância:</strong> ${p.substancia_mineral}</p>
+                        <p style="margin: 3px 0; font-size: 11px;"><strong>Área:</strong> ${p.area_ha ? p.area_ha.toLocaleString("pt-BR") : '-'} ha &bull; ${p.municipio}/${p.uf}</p>
+                        <p style="margin: 3px 0; font-size: 11px;"><strong>Alerta:</strong> <span style="font-weight: 600;">${p.pior_nivel_alerta}</span></p>
+                    </div>
+                `);
+            }
+        });
+
+        camadaPoligonosANM.addLayer(geoLayer);
+    } catch (e) {
+        console.warn("Sobreposição de poligonais ANM em stand-by:", e);
+    }
 }
 
 // =============================================================================
@@ -224,6 +282,10 @@ async function carregarAnalises() {
         renderizarTabela(analisesCache);
         atualizarEstatisticas(analisesCache);
         plotarProjetosNoMapa(analisesCache);
+        popularSelectsComparacao();
+        if (analisesCache.length > 0 && !projetoAtivoId) {
+            focarProjetoNoMapa(analisesCache[0].id, false);
+        }
     } catch (erro) {
         console.error("Erro ao carregar análises:", erro);
         tabelaCorpo.innerHTML = `<tr><td colspan="8" class="table-empty" style="color: var(--accent-danger);">Erro ao carregar dados: ${erro.message}</td></tr>`;
@@ -356,16 +418,27 @@ function focarProjetoNoMapa(projetoId, abrirPopup = true) {
         }
     }
 
-    // Atualiza Card de Informações
+    // Atualiza Card de Informações e Métricas Estruturais
     const elNome = document.getElementById("active-nome");
     const elAz = document.getElementById("active-azimute");
     const elLin = document.getElementById("active-lineamentos");
     const elRes = document.getElementById("active-res");
+    const elCompTot = document.getElementById("active-comp-total");
+    const elCompMed = document.getElementById("active-comp-medio");
+    const elDens = document.getElementById("active-densidade");
+
+    const features = proj.lineamentos_features || [];
+    const compTotalKm = features.reduce((acc, f) => acc + (f.properties?.comprimento_km || 0), 0);
+    const compMedioM = features.length > 0 ? (compTotalKm / features.length) * 1000 : 0;
+    const densidadeKmKm2 = compTotalKm / 2500.0; // Área de varredura padrão de ~50x50km (2500 km²)
 
     if (elNome) elNome.textContent = proj.nome_projeto;
     if (elAz) elAz.textContent = proj.azimute_predominante || "NE-SW (N45E)";
-    if (elLin) elLin.textContent = `${proj.total_lineamentos || 120} feições estruturais`;
+    if (elLin) elLin.textContent = `${proj.total_lineamentos || 120} feições`;
     if (elRes) elRes.textContent = proj.resolucao;
+    if (elCompTot) elCompTot.textContent = `${compTotalKm.toFixed(1)} km`;
+    if (elCompMed) elCompMed.textContent = `${compMedioM.toFixed(0)} m`;
+    if (elDens) elDens.textContent = `${densidadeKmKm2.toFixed(3)} km/km²`;
 
     // Re-anima o diagrama de roseta centrado no projeto
     animarRosetaParaProjeto(proj);
@@ -424,9 +497,14 @@ function renderizarTabela(lista) {
                 <td><span class="status-pill ${statusClasse}">${escapeHtml(item.status)}</span></td>
                 <td><span class="code-id">${escapeHtml(item.data_extracao)}</span></td>
                 <td style="text-align: center;">
-                    <button class="btn btn-secondary btn-sm" onclick="centralizarProjetoNoMapa(${item.id})">
-                        Ver no Mapa
-                    </button>
+                    <div style="display: flex; gap: 4px; justify-content: center; flex-wrap: wrap;">
+                        <button class="btn btn-secondary btn-sm" onclick="centralizarProjetoNoMapa(${item.id})" title="Enquadrar no Mapa">
+                            Mapa
+                        </button>
+                        <button class="btn btn-primary btn-sm" onclick="exportarGeoJSONProjeto(${item.id})" title="Exportar GeoJSON (Pronto para QGIS)">
+                            GeoJSON
+                        </button>
+                    </div>
                 </td>
             </tr>
         `;
@@ -626,3 +704,190 @@ function escapeHtml(texto) {
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
 }
+
+// =============================================================================
+// 8. Exportação GeoJSON (Padrão OGC / Pronto para Abertura no QGIS)
+// =============================================================================
+function exportarGeoJSONProjeto(projetoId) {
+    const proj = analisesCache.find(p => p.id === projetoId);
+    if (!proj) {
+        mostrarToast("Projeto não encontrado para exportação.", "error");
+        return;
+    }
+
+    const features = [];
+
+    // 1. Feições Lineares (LineStrings vetoriais)
+    if (proj.lineamentos_features && Array.isArray(proj.lineamentos_features)) {
+        proj.lineamentos_features.forEach(f => {
+            features.push({
+                type: "Feature",
+                geometry: f.geometry,
+                properties: {
+                    projeto_id: proj.id,
+                    projeto_nome: proj.nome_projeto,
+                    resolucao_mde: proj.resolucao,
+                    azimute: f.properties.azimute,
+                    tendencia: f.properties.tendencia,
+                    comprimento_km: f.properties.comprimento_km,
+                    sistema_geodesico: "WGS 84 / SIRGAS 2000 (EPSG:4326/4674)"
+                }
+            });
+        });
+    }
+
+    // 2. Feição Pontual: Centroide da Área de Varredura MDE
+    features.push({
+        type: "Feature",
+        geometry: {
+            type: "Point",
+            coordinates: [proj.longitude || -47.9292, proj.latitude || -15.7801]
+        },
+        properties: {
+            tipo_feicao: "Centroide de Extração SRTM",
+            projeto_id: proj.id,
+            nome_projeto: proj.nome_projeto,
+            resolucao_mde: proj.resolucao,
+            azimute_predominante: proj.azimute_predominante,
+            total_lineamentos: proj.total_lineamentos,
+            data_extracao: proj.data_extracao,
+            status: proj.status
+        }
+    });
+
+    const geojsonData = {
+        type: "FeatureCollection",
+        name: `SRTM_Lineamentos_${proj.nome_projeto.replace(/[^a-zA-Z0-9]/g, '_')}`,
+        crs: {
+            type: "name",
+            properties: { name: "urn:ogc:def:crs:OGC:1.3:CRS84" }
+        },
+        features: features
+    };
+
+    const blob = new Blob([JSON.stringify(geojsonData, null, 2)], { type: "application/geo+json;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    const slug = proj.nome_projeto.toLowerCase().replace(/[^a-z0-9]+/g, '_');
+    link.download = `lineamentos_srtm_${slug}_qgis.geojson`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    mostrarToast("GeoJSON exportado com sucesso! Pronto para abrir no QGIS.", "success");
+}
+
+function exportarGeoJSONAtivo() {
+    if (projetoAtivoId) {
+        exportarGeoJSONProjeto(projetoAtivoId);
+    } else if (analisesCache.length > 0) {
+        exportarGeoJSONProjeto(analisesCache[0].id);
+    } else {
+        mostrarToast("Nenhum projeto selecionado para exportação.", "error");
+    }
+}
+
+window.exportarGeoJSONProjeto = exportarGeoJSONProjeto;
+window.exportarGeoJSONAtivo = exportarGeoJSONAtivo;
+
+// =============================================================================
+// 9. Comparação Estrutural e Direcional entre Projetos SRTM
+// =============================================================================
+function popularSelectsComparacao() {
+    const selA = document.getElementById("select-comp-a");
+    const selB = document.getElementById("select-comp-b");
+    if (!selA || !selB || analisesCache.length === 0) return;
+
+    const options = analisesCache.map(p => `
+        <option value="${p.id}">${escapeHtml(p.nome_projeto)} (${escapeHtml(p.resolucao)})</option>
+    `).join("");
+
+    selA.innerHTML = options;
+    selB.innerHTML = options;
+
+    selA.value = analisesCache[0].id;
+    if (analisesCache.length > 1) {
+        selB.value = analisesCache[1].id;
+    } else {
+        selB.value = analisesCache[0].id;
+    }
+
+    atualizarComparacaoProjetos();
+}
+
+function atualizarComparacaoProjetos() {
+    const selA = document.getElementById("select-comp-a");
+    const selB = document.getElementById("select-comp-b");
+    if (!selA || !selB) return;
+
+    const idA = parseInt(selA.value);
+    const idB = parseInt(selB.value);
+
+    const projA = analisesCache.find(p => p.id === idA) || analisesCache[0];
+    const projB = analisesCache.find(p => p.id === idB) || (analisesCache[1] || analisesCache[0]);
+
+    if (!projA || !projB) return;
+
+    function calcularMetricas(p) {
+        const feats = p.lineamentos_features || [];
+        const compTot = feats.reduce((acc, f) => acc + (f.properties?.comprimento_km || 0), 0);
+        const compMed = feats.length > 0 ? (compTot / feats.length) * 1000 : 0;
+        const dens = compTot / 2500.0;
+        return { compTot, compMed, dens };
+    }
+
+    const mA = calcularMetricas(projA);
+    const mB = calcularMetricas(projB);
+
+    // Projeto A
+    const elANome = document.getElementById("comp-a-nome");
+    const elARes = document.getElementById("comp-a-res");
+    const elAAz = document.getElementById("comp-a-azimute");
+    const elATot = document.getElementById("comp-a-total");
+    const elAComp = document.getElementById("comp-a-comprimento");
+    const elAMed = document.getElementById("comp-a-medio");
+    const elADens = document.getElementById("comp-a-densidade");
+
+    if (elANome) elANome.textContent = projA.nome_projeto;
+    if (elARes) elARes.textContent = projA.resolucao;
+    if (elAAz) elAAz.textContent = projA.azimute_predominante || "NE-SW";
+    if (elATot) elATot.textContent = `${projA.total_lineamentos || 120} feições`;
+    if (elAComp) elAComp.textContent = `${mA.compTot.toFixed(1)} km`;
+    if (elAMed) elAMed.textContent = `${mA.compMed.toFixed(0)} m`;
+    if (elADens) elADens.textContent = `${mA.dens.toFixed(3)} km/km²`;
+
+    // Projeto B
+    const elBNome = document.getElementById("comp-b-nome");
+    const elBRes = document.getElementById("comp-b-res");
+    const elBAz = document.getElementById("comp-b-azimute");
+    const elBTot = document.getElementById("comp-b-total");
+    const elBComp = document.getElementById("comp-b-comprimento");
+    const elBMed = document.getElementById("comp-b-medio");
+    const elBDens = document.getElementById("comp-b-densidade");
+
+    if (elBNome) elBNome.textContent = projB.nome_projeto;
+    if (elBRes) elBRes.textContent = projB.resolucao;
+    if (elBAz) elBAz.textContent = projB.azimute_predominante || "NW-SE";
+    if (elBTot) elBTot.textContent = `${projB.total_lineamentos || 120} feições`;
+    if (elBComp) elBComp.textContent = `${mB.compTot.toFixed(1)} km`;
+    if (elBMed) elBMed.textContent = `${mB.compMed.toFixed(0)} m`;
+    if (elBDens) elBDens.textContent = `${mB.dens.toFixed(3)} km/km²`;
+
+    // Síntese e Interpretação Geológica Comparativa
+    const ratioDens = mB.dens > 0 ? (mA.dens / mB.dens).toFixed(2) : "1.00";
+    const sameAz = (projA.azimute_predominante || "").split(" ")[0] === (projB.azimute_predominante || "").split(" ")[0];
+    let insight = "";
+
+    if (projA.id === projB.id) {
+        insight = "Selecione dois projetos distintos nos campos acima para avaliar variações de direção azimutal e densidade de falhas.";
+    } else if (sameAz) {
+        insight = `Ambas as províncias compartilham a mesma tendência estrutural predominante (<strong>${projA.azimute_predominante}</strong>), evidenciando regime de deformação tectônica concordante. Razão de densidade de fraturamento: <strong>${ratioDens}x</strong>.`;
+    } else {
+        insight = `Discrepância direcional identificada: <strong>${projA.azimute_predominante}</strong> (Projeto A) vs <strong>${projB.azimute_predominante}</strong> (Projeto B), sugerindo cruzamento de sistemas de falhas ou fases tectônicas sobrepostas no relevo. Razão de densidade: <strong>${ratioDens}x</strong>.`;
+    }
+
+    const elInsight = document.getElementById("compare-insight-text");
+    if (elInsight) elInsight.innerHTML = insight;
+}
+
+window.atualizarComparacaoProjetos = atualizarComparacaoProjetos;
