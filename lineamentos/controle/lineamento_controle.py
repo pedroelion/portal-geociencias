@@ -48,6 +48,10 @@ def criar_analise(handler, payload: dict):
     resolucao = payload.get("resolucao", "").strip()
     status = payload.get("status", "Concluído").strip()
     data_extracao = payload.get("data_extracao", "").strip() or datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    latitude = payload.get("latitude")
+    longitude = payload.get("longitude")
+    azimute_predominante = payload.get("azimute_predominante")
+    total_lineamentos = payload.get("total_lineamentos")
 
     if not nome_projeto:
         responder_erro(handler, 422, "O campo 'nome_projeto' é obrigatório.")
@@ -61,7 +65,11 @@ def criar_analise(handler, payload: dict):
             nome_projeto=nome_projeto,
             resolucao=resolucao,
             status=status,
-            data_extracao=data_extracao
+            data_extracao=data_extracao,
+            latitude=latitude,
+            longitude=longitude,
+            azimute_predominante=azimute_predominante,
+            total_lineamentos=total_lineamentos
         )
         nova_analise.salvar()
 
