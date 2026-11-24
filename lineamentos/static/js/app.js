@@ -138,31 +138,32 @@ function inicializarMapa() {
 
     mapInstance = L.map("lineaments-map", {
         zoomControl: true,
-        attributionControl: true
+        attributionControl: true,
+        maxZoom: 19
     }).setView([-15.7801, -47.9292], 4);
 
     // 1.1. Esri World Topo / Shaded Relief (Ideal para relevo e geomorfologia)
     const esriTopo = criarTileLayer(
         "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",
-        { maxZoom: 18, attribution: "Esri Relevo & Topografia &bull; Sem API Key" }
+        { maxNativeZoom: 18, maxZoom: 19, attribution: "Esri Relevo & Topografia &bull; Sem API Key" }
     );
 
     // 1.2. Esri Dark Gray (Modo Noturno)
     const esriDark = criarTileLayer(
         "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}",
-        { maxZoom: 16, attribution: "Esri Dark Canvas" }
+        { maxNativeZoom: 16, maxZoom: 19, attribution: "Esri Dark Canvas" }
     );
 
     // 1.3. Esri Satélite (Alta Resolução)
     const esriSat = criarTileLayer(
         "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-        { maxZoom: 19, attribution: "Esri Satélite (Imagem Real)" }
+        { maxNativeZoom: 19, maxZoom: 19, attribution: "Esri Satélite (Imagem Real)" }
     );
 
     // 1.4. OpenStreetMap Padrão
     const osm = criarTileLayer(
         "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-        { maxZoom: 19, attribution: "&copy; OpenStreetMap contributors" }
+        { maxNativeZoom: 19, maxZoom: 19, attribution: "&copy; OpenStreetMap contributors" }
     );
 
     // Ativa Esri Topográfico por padrão (destaca relevo SRTM)
@@ -313,13 +314,13 @@ function plotarProjetosNoMapa(projetos) {
                     <div><strong>Status:</strong> ${escapeHtml(p.status)}</div>
                 </div>
                 <button class="btn btn-primary btn-sm popup-btn" onclick="focarProjetoNoMapa(${p.id}, true)">
-                    Focar e Analisar Roseta
+                    Aproximar Detalhes no Relevo
                 </button>
             </div>
         `;
 
         marker.bindPopup(popupContent);
-        marker.on("click", () => focarProjetoNoMapa(p.id, false));
+        marker.on("click", () => focarProjetoNoMapa(p.id, true));
         camadaProjetos.addLayer(marker);
     });
 }
@@ -337,7 +338,8 @@ function focarProjetoNoMapa(projetoId, abrirPopup = true) {
     plotarProjetosNoMapa(analisesCache);
 
     if (mapInstance && proj.latitude && proj.longitude) {
-        mapInstance.flyTo([proj.latitude, proj.longitude], 9, {
+        // Zoom detalhado (nível 15) para máxima nitidez das feições estruturais e relevo local
+        mapInstance.flyTo([proj.latitude, proj.longitude], 15, {
             animate: true,
             duration: 1.2
         });
@@ -350,7 +352,7 @@ function focarProjetoNoMapa(projetoId, abrirPopup = true) {
                         layer.openPopup();
                     }
                 });
-            }, 800);
+            }, 600);
         }
     }
 
@@ -388,7 +390,9 @@ function enquadrarTodosProjetos() {
 
     if (pontos.length > 0) {
         const bounds = L.latLngBounds(pontos);
-        mapInstance.fitBounds(bounds, { padding: [40, 40], maxZoom: 10 });
+        mapInstance.fitBounds(bounds, { padding: [50, 50], maxZoom: 6 });
+    } else {
+        mapInstance.setView([-15.7801, -47.9292], 4);
     }
 }
 
